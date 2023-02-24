@@ -57,8 +57,11 @@ namespace University_Records_System_Server_Application
                         break;
                 }
             }
-            catch
+            catch (Exception E)
             {
+                System.Diagnostics.Debug.WriteLine("Error: " + E.ToString());
+
+
                 if (connection != null)
                 {
                     await connection.CloseAsync();

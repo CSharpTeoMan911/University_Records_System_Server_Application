@@ -9,6 +9,29 @@ namespace University_Records_System_Server_Application
     class Authentification_Functions
     {
 
+        private sealed class Server_Functions_Mitigator:Server_Functions
+        {
+            internal static async Task<string> SMTPS_Service_Initiator(string random_key, string receipient_email_address, string function)
+            {
+                return await SMTPS_Service(random_key, receipient_email_address, function);
+            }
+        }
+
+
+        private sealed class Server_Cryptographic_Functions_Mitigator:Server_Cryptographic_Functions
+        {
+            internal static async Task<string> Create_Random_Key_Initiator()
+            {
+                return await Create_Random_Key();
+            }
+
+
+            internal static async Task<byte[]> Content_Hasher_Initiator(string content)
+            {
+                return await Content_Hasher(content);
+            }
+        }
+
         protected static async Task<string> Authentificate_User(string email, string password, MySqlConnector.MySqlConnection connection)
         {
             string authentification_result = "Authentification failed";
@@ -29,7 +52,7 @@ namespace University_Records_System_Server_Application
                         byte[] received_password = (byte[])reader["USER_PASSWORD"];
 
 
-                        if (Encoding.UTF8.GetString(received_password) == password)
+                        if (Encoding.UTF8.GetString(received_password) == Encoding.UTF8.GetString(await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(password)))
                         {
                             authentification_result = "Logged in";
                         }
@@ -91,37 +114,43 @@ namespace University_Records_System_Server_Application
 
                 try
                 {
-                    
-                    await reader.ReadAsync();
 
-                    MySqlConnector.MySqlCommand query_command = new MySqlConnector.MySqlCommand("INSERT INTO user_credentials VALUES(@email, @password);", connection);
-
-                    try
+                    if (await reader.ReadAsync() == false)
                     {
-                        if (reader.FieldCount > 0)
+                        MySqlConnector.MySqlCommand query_command = new MySqlConnector.MySqlCommand("INSERT INTO user_credentials VALUES(@email, @validated, @password);", connection);
+
+                        try
                         {
+                            byte[] hashed_password = await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(password);
+
                             query_command.Parameters.AddWithValue("email", email);
-                            query_command.Parameters.AddWithValue("password", password);
+                            query_command.Parameters.AddWithValue("validated", false);
+                            query_command.Parameters.AddWithValue("password", hashed_password);
 
                             registration_result = "Registered";
 
                             await reader.CloseAsync();
 
+
                             await query_command.ExecuteNonQueryAsync();
+
+                            await Server_Functions_Mitigator.SMTPS_Service_Initiator(await Server_Cryptographic_Functions_Mitigator.Create_Random_Key_Initiator(), email, "register");
                         }
-                    }
-                    catch
-                    {
-                        if (query_command != null)
+                        catch (Exception E)
                         {
-                            query_command.Cancel();
+                            System.Diagnostics.Debug.WriteLine("Error: " + E.ToString());
+
+                            if (query_command != null)
+                            {
+                                query_command.Cancel();
+                            }
                         }
-                    }
-                    finally
-                    {
-                        if(query_command != null)
+                        finally
                         {
-                            await query_command.DisposeAsync();
+                            if (query_command != null)
+                            {
+                                await query_command.DisposeAsync();
+                            }
                         }
                     }
 
