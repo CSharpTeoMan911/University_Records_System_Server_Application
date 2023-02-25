@@ -6,6 +6,7 @@ namespace University_Records_System_Server_Application
     internal class Program:Client_Connections
     {
         private static string Selected_Menu = "Main Menu";
+        private static bool Server_Startup = false;
         private static System.Net.Sockets.Socket? server_socket;
 
         private sealed class Server_Variables_Mitigator:Server_Variables
@@ -20,6 +21,11 @@ namespace University_Records_System_Server_Application
                 On_Off = on_off;
                 return Task.FromResult(true);
             }
+
+            internal static async Task<bool> Load_Certificate_At_Startup_Initiator()
+            {
+                return await Load_Certificate_At_Startup();
+            }
         }
 
         static void Main()
@@ -30,6 +36,13 @@ namespace University_Records_System_Server_Application
 
         private static async void Server_Initiation()
         {
+            if(Server_Startup == false)
+            {
+                await Server_Variables_Mitigator.Load_Certificate_At_Startup_Initiator();
+                Server_Startup = true;
+            }
+
+
             string output = String.Empty;
 
             if (Selected_Menu == "Main Menu")
