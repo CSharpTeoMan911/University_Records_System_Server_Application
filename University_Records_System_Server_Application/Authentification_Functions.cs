@@ -34,63 +34,116 @@ namespace University_Records_System_Server_Application
 
         protected static async Task<string> Authentificate_User(string email, string password, MySqlConnector.MySqlConnection connection)
         {
-            string authentification_result = "Authentification failed";
+            string authentification_result = "Connection error";
 
 
-            MySqlConnector.MySqlCommand command = new MySqlConnector.MySqlCommand("SELECT USER_PASSWORD FROM user_credentials WHERE USER_ID = @email;", connection);
+            MySqlConnector.MySqlCommand password_extraction_command = new MySqlConnector.MySqlCommand("SELECT USER_PASSWORD FROM user_credentials WHERE USER_ID = @email;", connection);
 
             try
             {
-                command.Parameters.AddWithValue("email", email);
+                password_extraction_command.Parameters.AddWithValue("email", email);
 
-                MySqlConnector.MySqlDataReader reader = await command.ExecuteReaderAsync();
+                MySqlConnector.MySqlDataReader password_extraction_command_reader = await password_extraction_command.ExecuteReaderAsync();
 
                 try
                 {
-                    if (await reader.ReadAsync() == true)
+                    if(await password_extraction_command_reader.ReadAsync() == true)
                     {
-                        byte[] received_password = (byte[])reader["USER_PASSWORD"];
+
+                        byte[] user_password = (byte[])password_extraction_command_reader["USER_PASSWORD"];
 
 
-                        if (Encoding.UTF8.GetString(received_password) == Encoding.UTF8.GetString(await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(password)))
+                        if(Encoding.UTF8.GetString(user_password) == Encoding.UTF8.GetString(await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(password)))
                         {
-                            authentification_result = "Logged in";
+
+
+                            await password_extraction_command_reader.CloseAsync();
+
+
+
+                            MySqlConnector.MySqlCommand account_validation_checkup_command = new MySqlConnector.MySqlCommand("SELECT USER_ID FROM user_credentials WHERE USER_ID = @email AND account_validated = TRUE;", connection);
+
+                            try
+                            {
+                                account_validation_checkup_command.Parameters.AddWithValue("email", email);
+
+                                MySqlConnector.MySqlDataReader account_validation_checkup_command_reader = await account_validation_checkup_command.ExecuteReaderAsync();
+
+
+                                try
+                                {
+                                    if(await account_validation_checkup_command_reader.ReadAsync() == true)
+                                    {
+                                        
+                                    }
+                                    else
+                                    {
+                                        authentification_result = "Account not validated";
+                                    }
+                                }
+                                catch
+                                {
+                                    if (account_validation_checkup_command_reader != null)
+                                    {
+                                        await account_validation_checkup_command_reader.CloseAsync();
+                                    }
+                                }
+                                finally
+                                {
+                                    if (account_validation_checkup_command_reader != null)
+                                    {
+                                        await account_validation_checkup_command_reader.CloseAsync();
+                                        await account_validation_checkup_command_reader.DisposeAsync();
+                                    }
+                                }
+                            }
+                            catch
+                            {
+
+                            }
+                            finally
+                            {
+                                if(account_validation_checkup_command != null)
+                                {
+                                    await account_validation_checkup_command.DisposeAsync();
+                                }
+                            }
                         }
+                        else
+                        {
+                            authentification_result = "Wrong password";
+                        }
+                    }
+                    else
+                    {
+                        authentification_result = "Wrong email address";
                     }
                 }
                 catch
                 {
-                    if (reader != null)
+                    if (password_extraction_command_reader != null)
                     {
-                        await reader.CloseAsync();
+                        await password_extraction_command_reader.CloseAsync();
                     }
-
-                    authentification_result = "Reader failed";
                 }
                 finally
                 {
-                    if (reader != null)
+                    if(password_extraction_command_reader != null)
                     {
-                        await reader .CloseAsync();
-                        reader.Dispose();
+                        await password_extraction_command_reader.CloseAsync();
+                        await password_extraction_command_reader.DisposeAsync();
                     }
                 }
-
             }
             catch
             {
-                if (command != null)
-                {
-                    command.Cancel();
-                }
 
-                authentification_result = "Command execution error";
             }
             finally
             {
-                if (command != null)
+                if(password_extraction_command != null)
                 {
-                    command.Dispose();
+                    await password_extraction_command.DisposeAsync();
                 }
             }
 
@@ -101,7 +154,7 @@ namespace University_Records_System_Server_Application
 
         protected static async Task<string> Register_User(string email, string password, MySqlConnector.MySqlConnection connection)
         {
-            string registration_result = "Registration failed";
+            string registration_result = "Connection error";
 
 
             MySqlConnector.MySqlCommand command = new MySqlConnector.MySqlCommand("SELECT USER_PASSWORD FROM user_credentials WHERE USER_ID = @email;", connection);
@@ -117,33 +170,98 @@ namespace University_Records_System_Server_Application
 
                     if (await reader.ReadAsync() == false)
                     {
+
                         MySqlConnector.MySqlCommand query_command = new MySqlConnector.MySqlCommand("INSERT INTO user_credentials VALUES(@email, @validated, @password);", connection);
 
                         try
                         {
-                            byte[] hashed_password = await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(password);
 
-                            query_command.Parameters.AddWithValue("email", email);
-                            query_command.Parameters.AddWithValue("validated", false);
-                            query_command.Parameters.AddWithValue("password", hashed_password);
-
-                            registration_result = "Registered";
-
-                            await reader.CloseAsync();
-
-
-                            await query_command.ExecuteNonQueryAsync();
-
-                            await Server_Functions_Mitigator.SMTPS_Service_Initiator(await Server_Cryptographic_Functions_Mitigator.Create_Random_Key_Initiator(), email, "register");
-                        }
-                        catch (Exception E)
-                        {
-                            System.Diagnostics.Debug.WriteLine("Error: " + E.ToString());
-
-                            if (query_command != null)
+                            try
                             {
-                                query_command.Cancel();
+                                System.Net.Mail.MailAddress received_email = new System.Net.Mail.MailAddress(email);
                             }
+                            catch
+                            {
+                                registration_result = "Invalid email address";
+                            }
+
+                            if(registration_result != "Invalid email address")
+                            {
+                                if (password.Length >= 6)
+                                {
+                                    Random_Key_Generation:
+                                    string random_key = await Server_Cryptographic_Functions_Mitigator.Create_Random_Key_Initiator();
+
+
+                                    //  !!!!!!!!!! TO DO !!!!!!!!!!!!
+                                    //
+                                    //  CHECK IF KEY EXIST
+                                    //
+                                    //  IF EXIST:
+                                    //
+                                    //     goto Random_Key_Generation;
+                                    //
+
+
+                                    string smtps_result = await Server_Functions_Mitigator.SMTPS_Service_Initiator(random_key, email, "register");
+
+
+                                    if (smtps_result == "SMTPS session successful")
+                                    {
+
+                                        byte[] hashed_password = await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(password);
+
+
+                                        query_command.Parameters.AddWithValue("email", email);
+                                        query_command.Parameters.AddWithValue("validated", false);
+                                        query_command.Parameters.AddWithValue("password", hashed_password);
+
+                                        registration_result = "Registered";
+
+                                        await reader.CloseAsync();
+
+                                        await query_command.ExecuteNonQueryAsync();
+
+                                        string current_date_time_string = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+
+
+
+                                        MySqlConnector.MySqlCommand move_account_to_validation_queue = new MySqlConnector.MySqlCommand("INSERT INTO pending_account_validation VALUES(@one_time_account_validation_code, @email, @expiration_date)", connection);
+
+                                        try
+                                        {
+                                            move_account_to_validation_queue.Parameters.AddWithValue("one_time_account_validation_code", random_key);
+                                            move_account_to_validation_queue.Parameters.AddWithValue("email", email);
+                                            move_account_to_validation_queue.Parameters.AddWithValue("expiration_date", current_date_time_string);
+                                            await move_account_to_validation_queue.ExecuteNonQueryAsync();
+                                        }
+                                        catch
+                                        {
+
+                                        }
+                                        finally
+                                        {
+                                            if(move_account_to_validation_queue != null)
+                                            {
+                                                await move_account_to_validation_queue.DisposeAsync();
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        registration_result = "Email server connection error";
+                                    }
+                                }
+                                else
+                                {
+                                    registration_result = "Password does not contain the amount of characters required";
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            
                         }
                         finally
                         {
@@ -153,43 +271,38 @@ namespace University_Records_System_Server_Application
                             }
                         }
                     }
-
-                }
-                catch(Exception E)
-                {
-                    System.Diagnostics.Debug.WriteLine("Error: " + E.Message);
-
-                    if (reader != null)
+                    else
                     {
-                        await reader.CloseAsync();
+                        registration_result = "Account already exist";
                     }
 
-                    registration_result = "Reader failed";
+                }
+                catch
+                {
+                    
+
+                    //registration_result = "Reader failed";
                 }
                 finally
                 {
                     if (reader != null)
                     {
                         await reader.CloseAsync();
-                        reader.Dispose();
+                        await reader.DisposeAsync();
                     }
                 }
 
             }
             catch
             {
-                if (command != null)
-                {
-                    command.Cancel();
-                }
-
-                registration_result = "Command execution error";
+                
+                //registration_result = "Command execution error";
             }
             finally
             {
                 if (command != null)
                 {
-                    command.Dispose();
+                    await command.DisposeAsync();
                 }
             }
 

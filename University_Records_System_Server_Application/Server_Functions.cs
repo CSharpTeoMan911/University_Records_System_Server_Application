@@ -19,6 +19,11 @@ namespace University_Records_System_Server_Application
             {
                 return Task.FromResult(SMTPS_Server_Email_Password);
             }
+
+            internal static Task<System.Security.Cryptography.X509Certificates.X509Certificate2> Get_Server_Certificate()
+            {
+                return Task.FromResult(server_certificate);
+            }
         }
 
 

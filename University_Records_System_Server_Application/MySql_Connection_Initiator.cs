@@ -36,9 +36,10 @@ namespace University_Records_System_Server_Application
         }
 
 
-        protected static async Task<string> Initiate_MySql_Connection<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
+        protected static async Task<Tuple<bool, string>> Initiate_MySql_Connection<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
         {
-            string authentification_result = "Connection error";
+            bool is_binary_file = false;
+            string authentification_result = String.Empty;
 
             MySqlConnector.MySqlConnection connection = new MySqlConnector.MySqlConnection("Server=localhost;UID=" + await Server_Variables_Mitigator.Get_MySql_Username() + ";Password=" + await Server_Variables_Mitigator.Get_MySql_Password() + ";Database=university_records_system");
 
@@ -59,9 +60,6 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                System.Diagnostics.Debug.WriteLine("Error: " + E.ToString());
-
-
                 if (connection != null)
                 {
                     await connection.CloseAsync();
@@ -76,7 +74,7 @@ namespace University_Records_System_Server_Application
                 }
             }
 
-            return authentification_result;
+            return new Tuple<bool, string>(is_binary_file, authentification_result);
         }
     }
 }

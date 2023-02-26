@@ -13,6 +13,9 @@ namespace University_Records_System_Server_Application
         protected static short On_Off;
 
 
+        protected static string certificate_password = "k_e-i-y-91-11-80";
+
+
         protected static string MySql_Username = "stundent_records_server";
         protected static string MySql_Password = "stundent_records_server";
 
@@ -36,7 +39,7 @@ namespace University_Records_System_Server_Application
                     cert_name_segment = "/student-records-system-certificate.pfx";
                 }
 
-                server_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(Environment.CurrentDirectory + cert_name_segment);
+                server_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(Environment.CurrentDirectory + cert_name_segment, certificate_password);
 
                 return Task.FromResult(true);
             }

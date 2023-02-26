@@ -61,7 +61,7 @@ namespace University_Records_System_Server_Application
             System.IO.MemoryStream payload_stream = new System.IO.MemoryStream();
 
             Server_WSDL_Payload payload = new Server_WSDL_Payload();
-            payload.response = content;
+            payload.response = Convert.ToBase64String(Encoding.UTF8.GetBytes(content));
 
             try
             {
