@@ -9,6 +9,13 @@ namespace University_Records_System_Server_Application
         private static bool Server_Startup = false;
         private static System.Net.Sockets.Socket? server_socket;
 
+
+        private static System.Timers.Timer server_main_loop = new System.Timers.Timer();
+
+
+        private static bool server_shutdown;
+
+
         private sealed class Server_Variables_Mitigator:Server_Variables
         {
             internal static Task<short> Get_If_Server_Is_On_Or_Off()
@@ -28,11 +35,36 @@ namespace University_Records_System_Server_Application
             }
         }
 
+        private sealed class Server_Functions_Mitigator:Server_Functions
+        {
+            internal static void Delete_Expired_Database_Items_Initiator()
+            {
+                Delete_Expired_Database_Items();
+            }
+        }
+
         static void Main()
         {
+            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
             Server_Initiation();
         }
 
+        private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
+        {
+            if(server_main_loop != null)
+            {
+                server_main_loop.Close();
+                server_main_loop.Dispose();
+            }
+
+            if(server_socket != null)
+            {
+                server_socket.Close();
+                server_socket.Dispose();
+            }
+
+            server_shutdown = true;
+        }
 
         private static async void Server_Initiation()
         {
@@ -53,11 +85,24 @@ namespace University_Records_System_Server_Application
 
             if (output == "Start")
             {
+                if(server_main_loop != null)
+                {
+                    server_main_loop.Elapsed += Server_main_loop_Elapsed;
+                    server_main_loop.Interval = 100;
+                    server_main_loop.Start();
+                }
+
                 await Server_Operation();
                 Server_Initiation();
             }
             else if (output == "Stop")
             {
+                if (server_main_loop != null)
+                {
+                    server_main_loop.Elapsed -= Server_main_loop_Elapsed;
+                    server_main_loop.Stop();
+                }
+
                 if (server_socket != null)
                 {
                     server_socket.Close();
@@ -79,6 +124,25 @@ namespace University_Records_System_Server_Application
                 Server_Initiation();
             }
         }
+
+
+
+
+        private static void Server_main_loop_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            if(server_shutdown == false)
+            {
+                System.Threading.Thread server_main_loop_thread = new System.Threading.Thread(() =>
+                {
+                    Server_Functions_Mitigator.Delete_Expired_Database_Items_Initiator();
+                });
+                server_main_loop_thread.Priority = System.Threading.ThreadPriority.AboveNormal;
+                server_main_loop_thread.IsBackground = true;
+                server_main_loop_thread.Start();
+            }
+        }
+
+
 
 
         private static async Task<bool> Server_Operation()
@@ -121,6 +185,8 @@ namespace University_Records_System_Server_Application
             return true;
         }
 
+
+        
 
     }
 }

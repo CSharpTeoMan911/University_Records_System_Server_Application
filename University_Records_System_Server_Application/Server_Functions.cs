@@ -24,6 +24,16 @@ namespace University_Records_System_Server_Application
             {
                 return Task.FromResult(server_certificate);
             }
+
+            internal static Task<string> Get_MySql_Username()
+            {
+                return Task.FromResult(MySql_Username);
+            }
+
+            internal static Task<string> Get_MySql_Password()
+            {
+                return Task.FromResult(MySql_Password);
+            }
         }
 
 
@@ -43,7 +53,7 @@ namespace University_Records_System_Server_Application
             {
                 message.From.Add(new MimeKit.MailboxAddress("Student Records System", await Server_Variables_Mitigator.Get_SMTPS_Server_Email()));
                 message.To.Add(new MimeKit.MailboxAddress("User", receipient_email_address));
-                message.Subject = "Log-in code";
+                message.Subject = function.ToUpper() + " CODE";
                 message.Body = new MimeKit.TextPart("plain") {Text = "Your one time " + function + " code: " + random_key};
 
 
@@ -89,5 +99,103 @@ namespace University_Records_System_Server_Application
 
             return SMTPS_Session_Result;
         }
+
+
+
+
+        protected static async void Delete_Expired_Database_Items()
+        {
+
+
+            MySqlConnector.MySqlConnection connection = new MySqlConnector.MySqlConnection("Server=localhost;UID=" + await Server_Variables_Mitigator.Get_MySql_Username() + ";Password=" + await Server_Variables_Mitigator.Get_MySql_Password() + ";Database=university_records_system");
+
+
+            try
+            {
+                await connection.OpenAsync();
+
+                MySqlConnector.MySqlCommand delete_expired_log_in_session_keys_command = new MySqlConnector.MySqlCommand("DELETE FROM user_log_in_keys WHERE Expiration_Date <= NOW();", connection);
+
+                try
+                {
+                    await delete_expired_log_in_session_keys_command.ExecuteNonQueryAsync();
+                }
+                catch
+                {
+
+                }
+                finally
+                {
+                    if(delete_expired_log_in_session_keys_command != null)
+                    {
+                        await delete_expired_log_in_session_keys_command.DisposeAsync();
+                    }
+                }
+
+
+                MySqlConnector.MySqlCommand delete_expired_pending_log_in_sessions = new MySqlConnector.MySqlCommand("DELETE FROM pending_log_in_sessions WHERE Expiration_Date <= NOW();", connection);
+
+                try
+                {
+                    await delete_expired_pending_log_in_sessions.ExecuteNonQueryAsync();
+                }
+                catch
+                {
+
+                }
+                finally
+                {
+                    if (delete_expired_pending_log_in_sessions != null)
+                    {
+                        await delete_expired_pending_log_in_sessions.DisposeAsync();
+                    }
+                }
+
+                /*
+                MySqlConnector.MySqlCommand delete_expired_accounts_pending_for_validation = new MySqlConnector.MySqlCommand("DELETE FROM user_credentials WHERE USER_ID = (SELECT USER_ID FROM pending_account_validation WHERE Expiration_Date <= NOW());", connection);
+
+                try
+                {
+                    await delete_expired_accounts_pending_for_validation.ExecuteNonQueryAsync();
+                }
+                catch(Exception E)
+                {
+                    System.Diagnostics.Debug.WriteLine("Command error: " + E.Message);
+                }
+                finally
+                {
+                    if (delete_expired_accounts_pending_for_validation != null)
+                    {
+                        await delete_expired_accounts_pending_for_validation.DisposeAsync();
+                    }
+                }
+                */
+            }
+            catch
+            {
+                
+            }
+            finally
+            {
+                if (connection != null)
+                {
+                    await connection.CloseAsync();
+                    await connection.DisposeAsync();
+                }
+            }
+        }
+
+        /*
+        protected static async Task<bool> Delete_Expired_Log_In_Session_Keys_Accounts()
+        {
+
+        }
+
+        protected static async Task<bool> Delete_Expired_Pending_Log_In_Sessions_Accounts()
+        {
+
+        }
+        */
+
     }
 }

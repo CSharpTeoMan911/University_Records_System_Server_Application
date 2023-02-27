@@ -33,13 +33,18 @@ namespace University_Records_System_Server_Application
             {
                 return await Register_User(email__or__log_in_session_key, password__or__binary_content, connection);
             }
+
+            internal static async Task<string> Account_Validation_Initiator(string email__or__log_in_session_key, string password__or__binary_content, MySqlConnector.MySqlConnection connection)
+            {
+                return await Account_Validation(email__or__log_in_session_key, password__or__binary_content, connection);
+            }
         }
 
 
         protected static async Task<Tuple<bool, string>> Initiate_MySql_Connection<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
         {
             bool is_binary_file = false;
-            string authentification_result = String.Empty;
+            string function_result = String.Empty;
 
             MySqlConnector.MySqlConnection connection = new MySqlConnector.MySqlConnection("Server=localhost;UID=" + await Server_Variables_Mitigator.Get_MySql_Username() + ";Password=" + await Server_Variables_Mitigator.Get_MySql_Password() + ";Database=university_records_system");
 
@@ -50,11 +55,15 @@ namespace University_Records_System_Server_Application
                 switch(function)
                 {
                     case "Log In":
-                        authentification_result = await Authentification_Functions_Mitigator.Authentificate_User_Initiator(email__or__log_in_session_key, password__or__binary_content as string, connection);
+                        function_result = await Authentification_Functions_Mitigator.Authentificate_User_Initiator(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Register":
-                        authentification_result = await Authentification_Functions_Mitigator.Register_User_Initiator(email__or__log_in_session_key, password__or__binary_content as string, connection);
+                        function_result = await Authentification_Functions_Mitigator.Register_User_Initiator(email__or__log_in_session_key, password__or__binary_content as string, connection);
+                        break;
+
+                    case "Account validation":
+                        function_result = await Authentification_Functions_Mitigator.Account_Validation_Initiator(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
                 }
             }
@@ -74,7 +83,7 @@ namespace University_Records_System_Server_Application
                 }
             }
 
-            return new Tuple<bool, string>(is_binary_file, authentification_result);
+            return new Tuple<bool, string>(is_binary_file, function_result);
         }
     }
 }
