@@ -37,9 +37,9 @@ namespace University_Records_System_Server_Application
 
         private sealed class Server_Functions_Mitigator:Server_Functions
         {
-            internal static void Delete_Expired_Database_Items_Initiator()
+            internal static async Task<bool> Delete_Expired_Database_Items_Initiator()
             {
-                Delete_Expired_Database_Items();
+                return await Delete_Expired_Database_Items();
             }
         }
 
@@ -132,9 +132,9 @@ namespace University_Records_System_Server_Application
         {
             if(server_shutdown == false)
             {
-                System.Threading.Thread server_main_loop_thread = new System.Threading.Thread(() =>
+                System.Threading.Thread server_main_loop_thread = new System.Threading.Thread(async() =>
                 {
-                    Server_Functions_Mitigator.Delete_Expired_Database_Items_Initiator();
+                    await Server_Functions_Mitigator.Delete_Expired_Database_Items_Initiator();
                 });
                 server_main_loop_thread.Priority = System.Threading.ThreadPriority.AboveNormal;
                 server_main_loop_thread.IsBackground = true;
@@ -151,7 +151,7 @@ namespace University_Records_System_Server_Application
             {
                 server_socket = new System.Net.Sockets.Socket(System.Net.Sockets.AddressFamily.InterNetwork, System.Net.Sockets.SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
                 server_socket.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 1024));
-                server_socket.Listen();
+                server_socket.Listen(1000);
 
 
                 System.Threading.Thread Server_Operation_Thread = new System.Threading.Thread(async () =>

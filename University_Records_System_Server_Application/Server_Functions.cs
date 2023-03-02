@@ -103,7 +103,7 @@ namespace University_Records_System_Server_Application
 
 
 
-        protected static async void Delete_Expired_Database_Items()
+        protected static async Task<bool> Delete_Expired_Database_Items()
         {
 
 
@@ -113,6 +113,7 @@ namespace University_Records_System_Server_Application
             try
             {
                 await connection.OpenAsync();
+
 
                 MySqlConnector.MySqlCommand delete_expired_log_in_session_keys_command = new MySqlConnector.MySqlCommand("DELETE FROM user_log_in_keys WHERE Expiration_Date <= NOW();", connection);
 
@@ -133,6 +134,8 @@ namespace University_Records_System_Server_Application
                 }
 
 
+
+
                 MySqlConnector.MySqlCommand delete_expired_pending_log_in_sessions = new MySqlConnector.MySqlCommand("DELETE FROM pending_log_in_sessions WHERE Expiration_Date <= NOW();", connection);
 
                 try
@@ -151,25 +154,84 @@ namespace University_Records_System_Server_Application
                     }
                 }
 
-                /*
-                MySqlConnector.MySqlCommand delete_expired_accounts_pending_for_validation = new MySqlConnector.MySqlCommand("DELETE FROM user_credentials WHERE USER_ID = (SELECT USER_ID FROM pending_account_validation WHERE Expiration_Date <= NOW());", connection);
+
+
+
+
+
+                List<string> expired_accounts_list = new List<string>();
+
+
+
+                MySqlConnector.MySqlCommand load_expired_accounts_pending_for_validation = new MySqlConnector.MySqlCommand("SELECT USER_ID FROM pending_account_validation WHERE Expiration_Date <= NOW();", connection);
 
                 try
                 {
-                    await delete_expired_accounts_pending_for_validation.ExecuteNonQueryAsync();
+                    MySqlConnector.MySqlDataReader load_expired_accounts_pending_for_validation_reader = load_expired_accounts_pending_for_validation.ExecuteReader();
+
+                    try
+                    {
+                        while(await load_expired_accounts_pending_for_validation_reader.ReadAsync() == true)
+                        {
+                            expired_accounts_list.Add((string)load_expired_accounts_pending_for_validation_reader["USER_ID"]);
+                        }
+                    }
+                    catch
+                    {
+                        if (load_expired_accounts_pending_for_validation_reader != null)
+                        {
+                            await load_expired_accounts_pending_for_validation_reader.CloseAsync();
+                        }
+                    }
+                    finally
+                    {
+                        if(load_expired_accounts_pending_for_validation_reader != null)
+                        {
+                            await load_expired_accounts_pending_for_validation_reader.CloseAsync();
+                            await load_expired_accounts_pending_for_validation_reader.DisposeAsync();
+                        }
+                    }
                 }
-                catch(Exception E)
+                catch (Exception E)
                 {
                     System.Diagnostics.Debug.WriteLine("Command error: " + E.Message);
                 }
                 finally
                 {
-                    if (delete_expired_accounts_pending_for_validation != null)
+                    if (load_expired_accounts_pending_for_validation != null)
                     {
-                        await delete_expired_accounts_pending_for_validation.DisposeAsync();
+                        await load_expired_accounts_pending_for_validation.DisposeAsync();
                     }
                 }
-                */
+
+
+
+
+
+                for(int index = 0; index< expired_accounts_list.Count(); index++)
+                {
+                    MySqlConnector.MySqlCommand delete_expired_accounts_pending_for_validation = new MySqlConnector.MySqlCommand("DELETE FROM user_credentials WHERE USER_ID = @email;", connection);
+
+                    delete_expired_accounts_pending_for_validation.Parameters.AddWithValue("email", expired_accounts_list[index]);
+
+                    try
+                    {
+                        await delete_expired_accounts_pending_for_validation.ExecuteNonQueryAsync();
+                    }
+                    catch (Exception E)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Command error: " + E.Message);
+                    }
+                    finally
+                    {
+                        if (delete_expired_accounts_pending_for_validation != null)
+                        {
+                            await delete_expired_accounts_pending_for_validation.DisposeAsync();
+                        }
+                    }
+                }
+                
+
             }
             catch
             {
@@ -183,6 +245,9 @@ namespace University_Records_System_Server_Application
                     await connection.DisposeAsync();
                 }
             }
+
+
+            return true;
         }
 
         /*

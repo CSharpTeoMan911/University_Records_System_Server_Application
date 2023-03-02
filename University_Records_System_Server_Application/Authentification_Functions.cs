@@ -35,6 +35,65 @@ namespace University_Records_System_Server_Application
 
 
 
+        protected static async Task<string> Log_In_Account(string email, string log_in_code, MySqlConnector.MySqlConnection connection)
+        {
+            string log_in_result = "Connection error";
+
+            MySqlConnector.MySqlCommand select_log_in_code_command = new MySqlConnector.MySqlCommand("SELECT FROM pending_log_in_sessions WHERE USER_ID = @email AND one_time_log_in_code = @code;");
+
+            try
+            {
+                select_log_in_code_command.Parameters.AddWithValue("email", email);
+                select_log_in_code_command.Parameters.AddWithValue("code", log_in_code);
+
+                MySqlConnector.MySqlDataReader select_log_in_code_command_reader = await select_log_in_code_command.ExecuteReaderAsync();
+
+                try
+                {
+                    if(await select_log_in_code_command_reader.ReadAsync() == true)
+                    {
+                        if(Encoding.UTF8.GetString((byte[])select_log_in_code_command_reader["one_time_log_in_code"]) == log_in_code)
+                        {
+                            await select_log_in_code_command_reader.CloseAsync();
+
+
+                        }
+                    }
+                }
+                catch
+                {
+                    if (select_log_in_code_command_reader != null)
+                    {
+                        await select_log_in_code_command_reader.CloseAsync();
+                    }
+                }
+                finally 
+                {
+                    if(select_log_in_code_command_reader != null)
+                    {
+                        await select_log_in_code_command_reader.CloseAsync();
+                        await select_log_in_code_command_reader.DisposeAsync();
+                    }
+                }
+
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                if(select_log_in_code_command != null)
+                {
+                    await select_log_in_code_command.DisposeAsync();
+                }
+            }
+
+            return log_in_result;
+        }
+
+
+
         protected static async Task<string> Authentificate_User(string email, string password, MySqlConnector.MySqlConnection connection)
         {
             string authentification_result = "Connection error";
@@ -87,7 +146,7 @@ namespace University_Records_System_Server_Application
                                         if (smtps_result == "SMTPS session successful")
                                         {
                                             
-                                            MySqlConnector.MySqlCommand log_in_session_key_insertion_command = new MySqlConnector.MySqlCommand("INSERT INTO pending_log_in_sessions VALUES(@email, @one_time_log_in_code, NOW() + INTERVAL 1 MINUTE);", connection);
+                                            MySqlConnector.MySqlCommand log_in_session_key_insertion_command = new MySqlConnector.MySqlCommand("INSERT INTO pending_log_in_sessions VALUES(@email, @one_time_log_in_code, NOW() + INTERVAL 5 MINUTE);", connection);
 
                                             try
                                             {
@@ -110,6 +169,10 @@ namespace University_Records_System_Server_Application
                                                 }
                                             }
 
+                                        }
+                                        else
+                                        {
+                                            authentification_result = "Email server connection error";
                                         }
 
                                     }
@@ -216,12 +279,14 @@ namespace University_Records_System_Server_Application
 
                             account_validation_result = "Account validation successful";
                         }
+                        else
+                        {
+                            account_validation_result = "Account validation not successful";
+                        }
                     }
                 }
-                catch(Exception E)
+                catch
                 {
-                    System.Diagnostics.Debug.WriteLine("Reader error: " + E.Message);
-
                     if (reader != null)
                     {
                         await reader.CloseAsync();
@@ -236,9 +301,8 @@ namespace University_Records_System_Server_Application
                     }
                 }
             }
-            catch (Exception E)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine("Command error: " + E.Message);
 
             }
             finally
@@ -311,7 +375,7 @@ namespace University_Records_System_Server_Application
                                         query_command.Parameters.AddWithValue("validated", false);
                                         query_command.Parameters.AddWithValue("password", hashed_password);
 
-                                        registration_result = "Registered";
+                                        registration_result = "Registration successful";
 
                                         await query_command.ExecuteNonQueryAsync();
 
@@ -399,6 +463,9 @@ namespace University_Records_System_Server_Application
         }
 
 
+
+
+
         protected static async Task<string> Valid_Random_Key_Generator(MySqlConnector.MySqlConnection connection, string email)
         {
         Valid_Random_Key_Generator:
@@ -409,118 +476,62 @@ namespace University_Records_System_Server_Application
 
 
 
-            MySqlConnector.MySqlCommand verify_if_pending_account_key_exists_command = new MySqlConnector.MySqlCommand("SELECT one_time_account_validation_code FROM pending_account_validation WHERE USER_ID = @email", connection);
+            
 
+            MySqlConnector.MySqlCommand verify_if_log_in_sessions_exists_command = new MySqlConnector.MySqlCommand("SELECT one_time_log_in_code FROM pending_log_in_sessions WHERE USER_ID = @email;", connection);
 
             try
             {
 
-                verify_if_pending_account_key_exists_command.Parameters.AddWithValue("email", "teodormihil07@gmail.com");
 
-                MySqlConnector.MySqlDataReader verify_if_pending_account_key_exists_command_reader = await verify_if_pending_account_key_exists_command.ExecuteReaderAsync();
+
+
+                verify_if_log_in_sessions_exists_command.Parameters.AddWithValue("email", email);
+
+                MySqlConnector.MySqlDataReader verify_if_log_in_sessions_exists_command_reader = await verify_if_log_in_sessions_exists_command.ExecuteReaderAsync();
 
                 try
                 {
-                    while(await verify_if_pending_account_key_exists_command_reader.ReadAsync() == true)
+                    while (await verify_if_log_in_sessions_exists_command_reader.ReadAsync() == true)
                     {
-                        if(Encoding.UTF8.GetString((byte[])verify_if_pending_account_key_exists_command_reader["one_time_account_validation_code"]) == Encoding.UTF8.GetString(hashed_random_key))
-                        {
-                            if (verify_if_pending_account_key_exists_command_reader != null)
-                            {
-                                await verify_if_pending_account_key_exists_command_reader.CloseAsync();
-                                await verify_if_pending_account_key_exists_command_reader.DisposeAsync();
-                            }
-
-                            
-                            goto Valid_Random_Key_Generator;
-                        }
-                    }
-
-
-                    await verify_if_pending_account_key_exists_command_reader.CloseAsync();
-
-                    MySqlConnector.MySqlCommand verify_if_log_in_sessions_exists_command = new MySqlConnector.MySqlCommand("SELECT one_time_log_in_code FROM pending_log_in_sessions WHERE USER_ID = @email;", connection);
-
-                    try
-                    {
-                        verify_if_log_in_sessions_exists_command.Parameters.AddWithValue("email", email);
-
-                        MySqlConnector.MySqlDataReader verify_if_log_in_sessions_exists_command_reader = await verify_if_log_in_sessions_exists_command.ExecuteReaderAsync();
-
-                        try
-                        {
-                            while (await verify_if_log_in_sessions_exists_command_reader.ReadAsync() == true)
-                            {
-                                if(Encoding.UTF8.GetString((byte[])verify_if_log_in_sessions_exists_command_reader["one_time_log_in_code"]) == Encoding.UTF8.GetString(hashed_random_key))
-                                {
-                                    if (verify_if_log_in_sessions_exists_command_reader != null)
-                                    {
-                                        await verify_if_log_in_sessions_exists_command_reader.CloseAsync();
-                                        await verify_if_log_in_sessions_exists_command_reader.DisposeAsync();
-                                    }
-
-                                    goto Valid_Random_Key_Generator;
-                                }
-                            }
-                        }
-                        catch
+                        if (Encoding.UTF8.GetString((byte[])verify_if_log_in_sessions_exists_command_reader["one_time_log_in_code"]) == Encoding.UTF8.GetString(hashed_random_key))
                         {
                             if (verify_if_log_in_sessions_exists_command_reader != null)
                             {
                                 await verify_if_log_in_sessions_exists_command_reader.CloseAsync();
-                            }
-                        }
-                        finally
-                        {
-                            if(verify_if_log_in_sessions_exists_command_reader != null)
-                            {
-                                await verify_if_log_in_sessions_exists_command_reader.CloseAsync();
                                 await verify_if_log_in_sessions_exists_command_reader.DisposeAsync();
                             }
-                        }
 
-                    }
-                    catch
-                    {
-                        
-                    }
-                    finally
-                    {
-                        if (verify_if_log_in_sessions_exists_command != null)
-                        {
-                            await verify_if_log_in_sessions_exists_command.DisposeAsync();
+                            goto Valid_Random_Key_Generator;
                         }
                     }
-
                 }
-                catch 
+                catch
                 {
-                    if (verify_if_pending_account_key_exists_command != null)
+                    if (verify_if_log_in_sessions_exists_command_reader != null)
                     {
-                        await verify_if_pending_account_key_exists_command_reader.CloseAsync();
+                        await verify_if_log_in_sessions_exists_command_reader.CloseAsync();
                     }
                 }
                 finally
                 {
-                    if (verify_if_pending_account_key_exists_command_reader != null)
+                    if (verify_if_log_in_sessions_exists_command_reader != null)
                     {
-                        await verify_if_pending_account_key_exists_command_reader.CloseAsync();
-                        await verify_if_pending_account_key_exists_command_reader.DisposeAsync();
+                        await verify_if_log_in_sessions_exists_command_reader.CloseAsync();
+                        await verify_if_log_in_sessions_exists_command_reader.DisposeAsync();
                     }
                 }
-
-
 
             }
             catch
             {
-               
+
             }
             finally
             {
-                if (verify_if_pending_account_key_exists_command != null)
+                if (verify_if_log_in_sessions_exists_command != null)
                 {
-                    await verify_if_pending_account_key_exists_command.DisposeAsync();
+                    await verify_if_log_in_sessions_exists_command.DisposeAsync();
                 }
             }
 

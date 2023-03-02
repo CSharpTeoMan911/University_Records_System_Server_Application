@@ -38,6 +38,11 @@ namespace University_Records_System_Server_Application
             {
                 return await Account_Validation(email__or__log_in_session_key, password__or__binary_content, connection);
             }
+
+            internal static async Task<string> Account_Log_In(string email__or__log_in_session_key, string password__or__binary_content, MySqlConnector.MySqlConnection connection)
+            {
+                return "";
+            }
         }
 
 
@@ -64,6 +69,10 @@ namespace University_Records_System_Server_Application
 
                     case "Account validation":
                         function_result = await Authentification_Functions_Mitigator.Account_Validation_Initiator(email__or__log_in_session_key, password__or__binary_content as string, connection);
+                        break;
+
+                    case "Account log in":
+                        function_result = await Authentification_Functions_Mitigator.Account_Log_In(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
                 }
             }
