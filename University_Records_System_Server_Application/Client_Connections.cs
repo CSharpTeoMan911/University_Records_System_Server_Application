@@ -77,7 +77,7 @@ namespace University_Records_System_Server_Application
 
                 try
                 {
-                    secure_client_stream.AuthenticateAsServer(await Server_Variables_Mitigator.Get_Server_Certificate(), false, true);
+                    secure_client_stream.AuthenticateAsServer(await Server_Variables_Mitigator.Get_Server_Certificate(), false, System.Security.Authentication.SslProtocols.Tls11, true);
 
 
                     int bytes_per_second = await Rount_Trip_Time_Calculator(secure_client_stream);

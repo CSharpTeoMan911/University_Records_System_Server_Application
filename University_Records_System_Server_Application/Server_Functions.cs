@@ -115,15 +115,15 @@ namespace University_Records_System_Server_Application
                 await connection.OpenAsync();
 
 
-                MySqlConnector.MySqlCommand delete_expired_log_in_session_keys_command = new MySqlConnector.MySqlCommand("DELETE FROM user_log_in_keys WHERE Expiration_Date <= NOW();", connection);
+                MySqlConnector.MySqlCommand delete_expired_log_in_session_keys_command = new MySqlConnector.MySqlCommand("DELETE FROM log_in_session_keys WHERE Expiration_Date <= NOW();", connection);
 
                 try
                 {
                     await delete_expired_log_in_session_keys_command.ExecuteNonQueryAsync();
                 }
-                catch
+                catch (Exception E)
                 {
-
+                    
                 }
                 finally
                 {
@@ -142,9 +142,9 @@ namespace University_Records_System_Server_Application
                 {
                     await delete_expired_pending_log_in_sessions.ExecuteNonQueryAsync();
                 }
-                catch
+                catch (Exception E)
                 {
-
+                    
                 }
                 finally
                 {
@@ -194,7 +194,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    System.Diagnostics.Debug.WriteLine("Command error: " + E.Message);
+
                 }
                 finally
                 {
@@ -220,7 +220,7 @@ namespace University_Records_System_Server_Application
                     }
                     catch (Exception E)
                     {
-                        System.Diagnostics.Debug.WriteLine("Command error: " + E.Message);
+
                     }
                     finally
                     {

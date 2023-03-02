@@ -39,28 +39,85 @@ namespace University_Records_System_Server_Application
         {
             string log_in_result = "Connection error";
 
-            MySqlConnector.MySqlCommand select_log_in_code_command = new MySqlConnector.MySqlCommand("SELECT FROM pending_log_in_sessions WHERE USER_ID = @email AND one_time_log_in_code = @code;");
+            MySqlConnector.MySqlCommand select_log_in_code_command = new MySqlConnector.MySqlCommand("SELECT one_time_log_in_code FROM pending_log_in_sessions WHERE USER_ID = @email;", connection);
 
             try
             {
+
                 select_log_in_code_command.Parameters.AddWithValue("email", email);
-                select_log_in_code_command.Parameters.AddWithValue("code", log_in_code);
+
 
                 MySqlConnector.MySqlDataReader select_log_in_code_command_reader = await select_log_in_code_command.ExecuteReaderAsync();
 
                 try
                 {
-                    if(await select_log_in_code_command_reader.ReadAsync() == true)
+                    while(await select_log_in_code_command_reader.ReadAsync() == true)
                     {
-                        if(Encoding.UTF8.GetString((byte[])select_log_in_code_command_reader["one_time_log_in_code"]) == log_in_code)
+                        if(Encoding.UTF8.GetString((byte[])select_log_in_code_command_reader["one_time_log_in_code"]) == Encoding.UTF8.GetString(await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(log_in_code)))
                         {
+
+
                             await select_log_in_code_command_reader.CloseAsync();
 
+                            MySqlConnector.MySqlCommand delete_log_in_code_command = new MySqlConnector.MySqlCommand("DELETE FROM pending_log_in_sessions WHERE USER_ID = @email AND one_time_log_in_code = @code;", connection);
 
+                            try
+                            {
+                                delete_log_in_code_command.Parameters.AddWithValue("email", email);
+                                delete_log_in_code_command.Parameters.AddWithValue("code", log_in_code);
+
+                                await delete_log_in_code_command.ExecuteNonQueryAsync();
+
+
+
+                                string log_in_session_key = await Valid_Random_Key_Generator(connection, email);
+
+
+                                MySqlConnector.MySqlCommand insert_log_in_session_key = new MySqlConnector.MySqlCommand("INSERT INTO log_in_session_keys VALUES(@email, @code, NOW() + INTERVAL 14 HOUR);", connection);
+
+                                try
+                                {
+                                    insert_log_in_session_key.Parameters.AddWithValue("email", email);
+                                    insert_log_in_session_key.Parameters.AddWithValue("code", await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(log_in_session_key));
+
+                                    await insert_log_in_session_key.ExecuteNonQueryAsync();
+
+                                    log_in_result = log_in_session_key;
+                                }
+                                catch(Exception E)
+                                {
+                                    
+                                }
+                                finally
+                                {
+                                    if(insert_log_in_session_key != null)
+                                    {
+                                        await insert_log_in_session_key.DisposeAsync();
+                                    }
+                                }
+
+                            }
+                            catch (Exception E)
+                            {
+                                
+
+                            }
+                            finally
+                            {
+                                if(delete_log_in_code_command != null)
+                                {
+                                    await delete_log_in_code_command.DisposeAsync();
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            log_in_result = "Wrong log in code";
                         }
                     }
                 }
-                catch
+                catch (Exception E)
                 {
                     if (select_log_in_code_command_reader != null)
                     {
@@ -77,8 +134,9 @@ namespace University_Records_System_Server_Application
                 }
 
             }
-            catch
+            catch (Exception E)
             {
+                
 
             }
             finally
@@ -159,7 +217,7 @@ namespace University_Records_System_Server_Application
                                             }
                                             catch(Exception E)
                                             {
-                                                System.Diagnostics.Debug.WriteLine("Reader exception: " + E.ToString());
+                                                
                                             }
                                             finally
                                             {
@@ -183,7 +241,6 @@ namespace University_Records_System_Server_Application
                                 }
                                 catch (Exception E)
                                 {
-                                    System.Diagnostics.Debug.WriteLine("Command exception: " + E.ToString());
                                     if (account_validation_checkup_command_reader != null)
                                     {
                                         await account_validation_checkup_command_reader.CloseAsync();
@@ -390,7 +447,7 @@ namespace University_Records_System_Server_Application
                                         }
                                         catch(Exception E)
                                         {
-                                            System.Diagnostics.Debug.WriteLine("Exception command: " + E.Message);
+
                                         }
                                         finally
                                         {
@@ -506,8 +563,9 @@ namespace University_Records_System_Server_Application
                         }
                     }
                 }
-                catch
+                catch (Exception E)
                 {
+                   
                     if (verify_if_log_in_sessions_exists_command_reader != null)
                     {
                         await verify_if_log_in_sessions_exists_command_reader.CloseAsync();
@@ -523,8 +581,9 @@ namespace University_Records_System_Server_Application
                 }
 
             }
-            catch
+            catch (Exception E)
             {
+                
 
             }
             finally
@@ -532,6 +591,64 @@ namespace University_Records_System_Server_Application
                 if (verify_if_log_in_sessions_exists_command != null)
                 {
                     await verify_if_log_in_sessions_exists_command.DisposeAsync();
+                }
+            }
+
+
+
+
+            MySqlConnector.MySqlCommand verify_if_log_in_key_exists_command = new MySqlConnector.MySqlCommand("SELECT log_in_session_key FROM log_in_session_keys WHERE USER_ID = @email;", connection);
+
+            try
+            {
+                verify_if_log_in_key_exists_command.Parameters.AddWithValue("email", email);
+
+                MySqlConnector.MySqlDataReader verify_if_log_in_key_exists_command_reader = await verify_if_log_in_key_exists_command.ExecuteReaderAsync();
+
+                try
+                {
+                    while(await verify_if_log_in_key_exists_command_reader.ReadAsync() == true)
+                    {
+                        if (Encoding.UTF8.GetString((byte[])verify_if_log_in_key_exists_command_reader["log_in_session_key"]) == Encoding.UTF8.GetString(hashed_random_key))
+                        {
+                            if (verify_if_log_in_key_exists_command_reader != null)
+                            {
+                                await verify_if_log_in_key_exists_command_reader.CloseAsync();
+                                await verify_if_log_in_key_exists_command_reader.DisposeAsync();
+                            }
+
+                            goto Valid_Random_Key_Generator;
+                        }
+                    }
+                }
+                catch(Exception E)
+                {
+                    
+                    if (verify_if_log_in_key_exists_command_reader != null)
+                    {
+                        await verify_if_log_in_key_exists_command_reader.CloseAsync();
+                    }
+                }
+                finally 
+                {
+                    if(verify_if_log_in_key_exists_command_reader != null)
+                    {
+                        await verify_if_log_in_key_exists_command_reader.CloseAsync();
+                        await verify_if_log_in_key_exists_command_reader.DisposeAsync();
+                    }
+                }
+
+            }
+            catch (Exception E)
+            {
+                
+
+            }
+            finally
+            {
+                if(verify_if_log_in_key_exists_command != null)
+                {
+                    await verify_if_log_in_key_exists_command.DisposeAsync();
                 }
             }
 
