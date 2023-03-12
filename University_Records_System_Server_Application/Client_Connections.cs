@@ -44,6 +44,15 @@ namespace University_Records_System_Server_Application
             }
         }
 
+        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
+        {
+            internal async static Task<bool> Error_Logs(Exception E, string function)
+            {
+                return await Server_Error_Logs(E, function);
+            }
+        }
+
+
 
 
 
@@ -189,8 +198,10 @@ namespace University_Records_System_Server_Application
 
 
                 }
-                catch
+                catch (Exception E)
                 {
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Operation_Selection");
+
                     if (secure_client_stream != null)
                     {
                         secure_client_stream.Close();
@@ -206,8 +217,10 @@ namespace University_Records_System_Server_Application
                     }
                 }
             }
-            catch
+            catch (Exception E)
             {
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Operation_Selection");
+
                 if (client_stream != null)
                 {
                     client_stream.Close();

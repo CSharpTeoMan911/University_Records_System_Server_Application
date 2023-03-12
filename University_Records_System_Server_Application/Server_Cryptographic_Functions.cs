@@ -13,6 +13,18 @@ namespace University_Records_System_Server_Application
         private static string[] lowercase_letters = new string[] {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
 
 
+
+        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
+        {
+            internal async static Task<bool> Error_Logs(Exception E, string function)
+            {
+                return await Server_Error_Logs(E, function);
+            }
+        }
+
+
+
+
         protected static Task<string> Create_Random_Key()
         {
             string random_key = String.Empty;
@@ -39,7 +51,7 @@ namespace University_Records_System_Server_Application
             return Task.FromResult(random_key);
         }
 
-        protected static Task<byte[]> Content_Hasher(string content)
+        protected static async Task<byte[]> Content_Hasher(string content)
         {
             byte[] Content_Hashing_Result = new byte[] { };
             System.Security.Cryptography.HashAlgorithm content_hasher = System.Security.Cryptography.SHA256.Create();
@@ -48,7 +60,10 @@ namespace University_Records_System_Server_Application
             {
                 Content_Hashing_Result = content_hasher.ComputeHash(Encoding.UTF8.GetBytes(content));
             }
-            catch { }
+            catch (Exception E)
+            {
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Content_Hasher");
+            }
             finally
             {
                 if (content_hasher != null)
@@ -57,7 +72,7 @@ namespace University_Records_System_Server_Application
                 }
             }
 
-            return Task.FromResult(Content_Hashing_Result);
+            return Content_Hashing_Result;
         }
 
     }

@@ -34,6 +34,15 @@ namespace University_Records_System_Server_Application
         }
 
 
+        private sealed class Server_Logs_Writer_Mitigator:Server_Logs_Writer
+        {
+            internal async static Task<bool> Error_Logs(Exception E, string function)
+            {
+                return await Server_Error_Logs(E, function);
+            }
+        }
+
+
 
         protected static async Task<string> Log_In_Account(string email, string log_in_code, MySqlConnector.MySqlConnection connection)
         {
@@ -86,7 +95,7 @@ namespace University_Records_System_Server_Application
                                 }
                                 catch(Exception E)
                                 {
-                                    
+                                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Log_In_Account");
                                 }
                                 finally
                                 {
@@ -99,8 +108,7 @@ namespace University_Records_System_Server_Application
                             }
                             catch (Exception E)
                             {
-                                
-
+                                Server_Logs_Writer_Mitigator.Error_Logs(E, "Log_In_Account");
                             }
                             finally
                             {
@@ -119,6 +127,8 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Log_In_Account");
+
                     if (select_log_in_code_command_reader != null)
                     {
                         await select_log_in_code_command_reader.CloseAsync();
@@ -136,8 +146,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                
-
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Log_In_Account");
             }
             finally
             {
@@ -217,7 +226,7 @@ namespace University_Records_System_Server_Application
                                             }
                                             catch(Exception E)
                                             {
-                                                
+                                                Server_Logs_Writer_Mitigator.Error_Logs(E, "Authentificate_User");
                                             }
                                             finally
                                             {
@@ -241,6 +250,8 @@ namespace University_Records_System_Server_Application
                                 }
                                 catch (Exception E)
                                 {
+                                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Authentificate_User");
+
                                     if (account_validation_checkup_command_reader != null)
                                     {
                                         await account_validation_checkup_command_reader.CloseAsync();
@@ -255,9 +266,9 @@ namespace University_Records_System_Server_Application
                                     }
                                 }
                             }
-                            catch
+                            catch(Exception E)
                             {
-
+                                Server_Logs_Writer_Mitigator.Error_Logs(E, "Authentificate_User");
                             }
                             finally
                             {
@@ -269,16 +280,18 @@ namespace University_Records_System_Server_Application
                         }
                         else
                         {
-                            authentification_result = "Wrong password";
+                            authentification_result = "Invalid password";
                         }
                     }
                     else
                     {
-                        authentification_result = "Wrong email address";
+                        authentification_result = "Invalid email address";
                     }
                 }
-                catch
+                catch (Exception E)
                 {
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Authentificate_User");
+
                     if (password_extraction_command_reader != null)
                     {
                         await password_extraction_command_reader.CloseAsync();
@@ -293,9 +306,9 @@ namespace University_Records_System_Server_Application
                     }
                 }
             }
-            catch
+            catch (Exception E)
             {
-
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Authentificate_User");
             }
             finally
             {
@@ -306,6 +319,36 @@ namespace University_Records_System_Server_Application
             }
 
             return authentification_result;
+        }
+
+
+
+        protected static async Task<string> Log_Out_Account(string log_in_session_key, MySqlConnector.MySqlConnection connection)
+        {
+            string log_out_result = "Connection error";
+
+            MySqlConnector.MySqlCommand command = new MySqlConnector.MySqlCommand("DELETE FROM log_in_session_keys WHERE log_in_session_key = @log_in_session_key;", connection);
+
+            try
+            {
+                command.Parameters.AddWithValue("log_in_session_key", await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(log_in_session_key));
+                command.ExecuteNonQuery();
+
+                log_out_result = "Logged out";
+            }
+            catch (Exception E)
+            {
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Log_Out_Account");
+            }
+            finally
+            {
+                if (command != null)
+                {
+                    await command.DisposeAsync();
+                }
+            }
+
+            return log_out_result;
         }
 
 
@@ -342,8 +385,10 @@ namespace University_Records_System_Server_Application
                         }
                     }
                 }
-                catch
+                catch (Exception E)
                 {
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Account_Validation");
+
                     if (reader != null)
                     {
                         await reader.CloseAsync();
@@ -358,9 +403,9 @@ namespace University_Records_System_Server_Application
                     }
                 }
             }
-            catch
+            catch (Exception E)
             {
-
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Account_Validation");
             }
             finally
             {
@@ -405,8 +450,10 @@ namespace University_Records_System_Server_Application
                             {
                                 System.Net.Mail.MailAddress received_email = new System.Net.Mail.MailAddress(email);
                             }
-                            catch
+                            catch (Exception E)
                             {
+                                Server_Logs_Writer_Mitigator.Error_Logs(E, "Register_User");
+
                                 registration_result = "Invalid email address";
                             }
 
@@ -445,9 +492,9 @@ namespace University_Records_System_Server_Application
                                             move_account_to_validation_queue.Parameters.AddWithValue("one_time_account_validation_code", await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(random_key));
                                             await move_account_to_validation_queue.ExecuteNonQueryAsync();
                                         }
-                                        catch(Exception E)
+                                        catch (Exception E)
                                         {
-
+                                            Server_Logs_Writer_Mitigator.Error_Logs(E, "Register_User");
                                         }
                                         finally
                                         {
@@ -469,9 +516,9 @@ namespace University_Records_System_Server_Application
                                 }
                             }
                         }
-                        catch
+                        catch (Exception E)
                         {
-                            
+                            Server_Logs_Writer_Mitigator.Error_Logs(E, "Register_User");
                         }
                         finally
                         {
@@ -487,11 +534,9 @@ namespace University_Records_System_Server_Application
                     }
 
                 }
-                catch
+                catch (Exception E)
                 {
-                    
-
-                    //registration_result = "Reader failed";
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Register_User");
                 }
                 finally
                 {
@@ -503,10 +548,9 @@ namespace University_Records_System_Server_Application
                 }
 
             }
-            catch
+            catch (Exception E)
             {
-                
-                //registration_result = "Command execution error";
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Register_User");
             }
             finally
             {
@@ -520,7 +564,59 @@ namespace University_Records_System_Server_Application
         }
 
 
+        protected static async Task<string> Log_In_Session_Key_Validation(string log_in_session_key, MySqlConnector.MySqlConnection connection)
+        {
+            string Log_In_Session_Key_Validation_Result = "Connection error";
 
+            MySqlConnector.MySqlCommand command = new MySqlConnector.MySqlCommand("SELECT log_in_session_key FROM log_in_session_keys WHERE log_in_session_key = @log_in_session_key;", connection);
+
+            command.Parameters.AddWithValue("log_in_session_key", log_in_session_key);
+
+            try
+            {
+                MySqlConnector.MySqlDataReader reader = await command.ExecuteReaderAsync();
+
+                try
+                {
+                    if(await reader.ReadAsync() == true)
+                    {
+                        Log_In_Session_Key_Validation_Result = "Log in session key validated";
+                    }
+                    else
+                    {
+                        Log_In_Session_Key_Validation_Result = "Invalid log in session key";
+                    }
+                }
+                catch
+                {
+                    if (reader != null)
+                    {
+                        await reader.CloseAsync();
+                    }
+                }
+                finally
+                {
+                    if(reader != null)
+                    {
+                        await reader.CloseAsync();
+                        await reader.DisposeAsync();
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                if(command != null)
+                {
+                    await command.DisposeAsync();
+                }
+            }
+
+            return Log_In_Session_Key_Validation_Result;
+        }
 
 
         protected static async Task<string> Valid_Random_Key_Generator(MySqlConnector.MySqlConnection connection, string email)
@@ -565,7 +661,8 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                   
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Valid_Random_Key_Generator");
+
                     if (verify_if_log_in_sessions_exists_command_reader != null)
                     {
                         await verify_if_log_in_sessions_exists_command_reader.CloseAsync();
@@ -583,8 +680,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                
-
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Valid_Random_Key_Generator");
             }
             finally
             {
@@ -623,7 +719,8 @@ namespace University_Records_System_Server_Application
                 }
                 catch(Exception E)
                 {
-                    
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Valid_Random_Key_Generator");
+
                     if (verify_if_log_in_key_exists_command_reader != null)
                     {
                         await verify_if_log_in_key_exists_command_reader.CloseAsync();
@@ -641,8 +738,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                
-
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Valid_Random_Key_Generator");
             }
             finally
             {

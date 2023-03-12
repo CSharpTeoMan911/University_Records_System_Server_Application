@@ -8,13 +8,23 @@ namespace University_Records_System_Server_Application
 {
     class Payload_Serialisation_and_Deserialisation
     {
+
+        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
+        {
+            internal async static Task<bool> Error_Logs(Exception E, string function)
+            {
+                return await Server_Error_Logs(E, function);
+            }
+        }
+
+
         protected static Task<byte[]> Serialise_Server_Payload()
         {
             return Task.FromResult(new byte[] { });
         }
 
 
-        protected static Task<Client_WSDL_Payload> Deserialise_Client_Payload(byte[] payload)
+        protected static async Task<Client_WSDL_Payload> Deserialise_Client_Payload(byte[] payload)
         {
             Client_WSDL_Payload client_payload = new Client_WSDL_Payload();
 
@@ -33,6 +43,8 @@ namespace University_Records_System_Server_Application
             }
             catch(Exception E)
             {
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Deserialise_Client_Payload");
+
                 if (payload_stream != null)
                 {
                     payload_stream.Close();
@@ -48,7 +60,7 @@ namespace University_Records_System_Server_Application
             }
 
 
-            return Task.FromResult(client_payload);
+            return client_payload;
         }
 
 
@@ -71,9 +83,11 @@ namespace University_Records_System_Server_Application
                 serialised_payload = payload_stream.ToArray();
                 await payload_stream.FlushAsync();
             }
-            catch
+            catch(Exception E)
             {
-                if(payload_stream != null)
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Serialise_Server_Payload");
+
+                if (payload_stream != null)
                 {
                     payload_stream.Close();
                 }

@@ -23,7 +23,24 @@ namespace University_Records_System_Server_Application
         protected static string SMTPS_Server_Email_Address = "student.records.system.smtps@gmail.com";
         protected static string SMTPS_Server_Email_Password = "hjtqpldmrvvcfdtm";
 
-        protected static Task<bool> Load_Certificate_At_Startup()
+
+
+
+
+
+        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
+        {
+            internal async static Task<bool> Error_Logs(Exception E, string function)
+            {
+                return await Server_Error_Logs(E, function);
+            }
+        }
+
+
+
+
+
+        protected static Task<bool> Load_Certificate()
         {
             string cert_name_segment = String.Empty;
 
@@ -43,8 +60,28 @@ namespace University_Records_System_Server_Application
 
                 return Task.FromResult(true);
             }
-            catch
+            catch (Exception E)
             {
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Load_Certificate_At_Startup");
+
+                return Task.FromResult(false);
+            }
+
+        }
+
+
+        protected static Task<bool> Unload_Certificate()
+        {
+            try
+            {
+                server_certificate.Dispose();
+
+                return Task.FromResult(true);
+            }
+            catch (Exception E)
+            {
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Load_Certificate_At_Startup");
+
                 return Task.FromResult(false);
             }
 

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "University_Records_System_Server_Application": {
+      "commandName": "Project"
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "environmentVariables": {},
+      "distributionName": ""
+    }
+  }
+}

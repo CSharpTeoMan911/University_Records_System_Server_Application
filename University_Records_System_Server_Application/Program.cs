@@ -29,9 +29,14 @@ namespace University_Records_System_Server_Application
                 return Task.FromResult(true);
             }
 
-            internal static async Task<bool> Load_Certificate_At_Startup_Initiator()
+            internal static async Task<bool> Load_Certificate_Initiator()
             {
-                return await Load_Certificate_At_Startup();
+                return await Load_Certificate();
+            }
+
+            internal static async Task<bool> Unload_Certificate_Initiator()
+            {
+                return await Unload_Certificate();
             }
         }
 
@@ -43,13 +48,17 @@ namespace University_Records_System_Server_Application
             }
         }
 
+
+
+
         static void Main()
         {
+            System.Threading.ThreadPool.SetMinThreads(1000, 1000);
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
             Server_Initiation();
         }
 
-        private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
+        private static async void CurrentDomain_ProcessExit(object? sender, EventArgs e)
         {
             if(server_main_loop != null)
             {
@@ -63,18 +72,14 @@ namespace University_Records_System_Server_Application
                 server_socket.Dispose();
             }
 
+            await Server_Variables_Mitigator.Unload_Certificate_Initiator();
+
             server_shutdown = true;
         }
 
         private static async void Server_Initiation()
         {
-            if(Server_Startup == false)
-            {
-                await Server_Variables_Mitigator.Load_Certificate_At_Startup_Initiator();
-                Server_Startup = true;
-            }
-
-
+        
             string output = String.Empty;
 
             if (Selected_Menu == "Main Menu")
@@ -87,6 +92,8 @@ namespace University_Records_System_Server_Application
             {
                 if(server_main_loop != null)
                 {
+                    await Server_Variables_Mitigator.Load_Certificate_Initiator();
+
                     server_main_loop.Elapsed += Server_main_loop_Elapsed;
                     server_main_loop.Interval = 100;
                     server_main_loop.Start();
@@ -99,6 +106,8 @@ namespace University_Records_System_Server_Application
             {
                 if (server_main_loop != null)
                 {
+                    await Server_Variables_Mitigator.Unload_Certificate_Initiator();
+
                     server_main_loop.Elapsed -= Server_main_loop_Elapsed;
                     server_main_loop.Stop();
                 }
@@ -149,10 +158,39 @@ namespace University_Records_System_Server_Application
         {
             try
             {
+                int Worker_Threads = 0;
+                int Port_Threads = 0;
+
+                System.Threading.ThreadPool.GetAvailableThreads(out Worker_Threads, out Port_Threads);
+
+
+                if(Worker_Threads < 1000)
+                {
+                    System.Threading.ThreadPool.SetMaxThreads(Worker_Threads + 1000, Port_Threads);
+                }
+                else if(Worker_Threads > 1000)
+                {
+                    System.Threading.ThreadPool.SetMaxThreads(Worker_Threads - (Worker_Threads - 1000), Port_Threads);
+                }
+
+
+
+                if(Port_Threads < 1000)
+                {
+                    System.Threading.ThreadPool.SetMaxThreads(Worker_Threads, Port_Threads + 1000);
+                }
+                else if(Port_Threads > 1000)
+                {
+                    System.Threading.ThreadPool.SetMaxThreads(Worker_Threads, Port_Threads - (Port_Threads - 1000));
+                }
+
+
+
+
+
                 server_socket = new System.Net.Sockets.Socket(System.Net.Sockets.AddressFamily.InterNetwork, System.Net.Sockets.SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
                 server_socket.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 1024));
                 server_socket.Listen(1000);
-
 
                 System.Threading.Thread Server_Operation_Thread = new System.Threading.Thread(async () =>
                 {

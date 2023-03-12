@@ -43,7 +43,30 @@ namespace University_Records_System_Server_Application
             {
                 return await Log_In_Account(email__or__log_in_session_key, password__or__binary_content, connection);
             }
+
+            internal static async Task<string> Log_Out_Account_Initiator(string email__or__log_in_session_key, MySqlConnector.MySqlConnection connection)
+            {
+                return await Log_Out_Account(email__or__log_in_session_key, connection);
+            }
+
+            internal static async Task<string> Log_In_Session_Key_Validation_Initiator(string email__or__log_in_session_key, MySqlConnector.MySqlConnection connection)
+            {
+                return await Log_In_Session_Key_Validation(email__or__log_in_session_key, connection);
+            }
         }
+
+        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
+        {
+            internal async static Task<bool> Error_Logs(Exception E, string function)
+            {
+                return await Server_Error_Logs(E, function);
+            }
+        }
+
+
+
+
+
 
 
         protected static async Task<Tuple<bool, string>> Initiate_MySql_Connection<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
@@ -56,6 +79,7 @@ namespace University_Records_System_Server_Application
             try
             {
                 await connection.OpenAsync();
+
                 
                 switch(function)
                 {
@@ -74,10 +98,20 @@ namespace University_Records_System_Server_Application
                     case "Account log in":
                         function_result = await Authentification_Functions_Mitigator.Log_In_Account_Initiator(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
+
+                    case "Account log out":
+                        function_result = await Authentification_Functions_Mitigator.Log_Out_Account_Initiator(email__or__log_in_session_key, connection);
+                        break;
+
+                    case "Log in session key validation":
+                        function_result = await Authentification_Functions_Mitigator.Log_In_Session_Key_Validation_Initiator(email__or__log_in_session_key, connection);
+                        break;
                 }
             }
             catch (Exception E)
             {
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Initiate_MySql_Connection");
+
                 if (connection != null)
                 {
                     await connection.CloseAsync();

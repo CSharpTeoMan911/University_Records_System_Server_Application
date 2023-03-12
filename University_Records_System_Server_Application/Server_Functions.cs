@@ -8,6 +8,16 @@ namespace University_Records_System_Server_Application
 {
     class Server_Functions
     {
+
+        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
+        {
+            internal async static Task<bool> Error_Logs(Exception E, string function)
+            {
+                return await Server_Error_Logs(E, function);
+            }
+        }
+
+
         private sealed class Server_Variables_Mitigator : Server_Variables
         {
             internal static Task<string> Get_SMTPS_Server_Email()
@@ -68,8 +78,10 @@ namespace University_Records_System_Server_Application
 
                     SMTPS_Session_Result = "SMTPS session successful";
                 }
-                catch
+                catch(Exception E)
                 {
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "SMTPS_Service");
+
                     SMTPS_Session_Result = "SMTPS client socket connection failed";
 
                     if (client != null)
@@ -85,8 +97,10 @@ namespace University_Records_System_Server_Application
                     }
                 }
             }
-            catch
+            catch (Exception E)
             {
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "SMTPS_Service");
+
                 SMTPS_Session_Result = "Message formatting failed";
             }
             finally
@@ -123,7 +137,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
                 }
                 finally
                 {
@@ -144,7 +158,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
                 }
                 finally
                 {
@@ -176,8 +190,10 @@ namespace University_Records_System_Server_Application
                             expired_accounts_list.Add((string)load_expired_accounts_pending_for_validation_reader["USER_ID"]);
                         }
                     }
-                    catch
+                    catch(Exception E)
                     {
+                        Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
+
                         if (load_expired_accounts_pending_for_validation_reader != null)
                         {
                             await load_expired_accounts_pending_for_validation_reader.CloseAsync();
@@ -194,7 +210,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-
+                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
                 }
                 finally
                 {
@@ -220,7 +236,7 @@ namespace University_Records_System_Server_Application
                     }
                     catch (Exception E)
                     {
-
+                        Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
                     }
                     finally
                     {
@@ -233,9 +249,9 @@ namespace University_Records_System_Server_Application
                 
 
             }
-            catch
+            catch(Exception E)
             {
-                
+                Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
             }
             finally
             {
