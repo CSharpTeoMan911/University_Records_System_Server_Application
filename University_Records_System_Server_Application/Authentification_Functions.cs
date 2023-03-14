@@ -570,7 +570,7 @@ namespace University_Records_System_Server_Application
 
             MySqlConnector.MySqlCommand command = new MySqlConnector.MySqlCommand("SELECT log_in_session_key FROM log_in_session_keys WHERE log_in_session_key = @log_in_session_key;", connection);
 
-            command.Parameters.AddWithValue("log_in_session_key", log_in_session_key);
+            command.Parameters.AddWithValue("log_in_session_key", await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(log_in_session_key));
 
             try
             {
