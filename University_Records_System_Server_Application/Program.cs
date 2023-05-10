@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace University_Records_System_Server_Application
 {
-    internal class Program:Client_Connections
+    internal class Program:Server_Functions
     {
         private static string Selected_Menu = "Main Menu";
         private static bool Server_Startup = false;
@@ -11,42 +11,9 @@ namespace University_Records_System_Server_Application
 
 
         private static System.Timers.Timer server_main_loop = new System.Timers.Timer();
-
-
         private static bool server_shutdown;
 
 
-        private sealed class Server_Variables_Mitigator:Server_Variables
-        {
-            internal static Task<short> Get_If_Server_Is_On_Or_Off()
-            {
-                return Task.FromResult(On_Off);
-            }
-
-            internal static Task<bool> Set_If_Server_Is_On_Or_Off(short on_off)
-            {
-                On_Off = on_off;
-                return Task.FromResult(true);
-            }
-
-            internal static async Task<bool> Load_Certificate_Initiator()
-            {
-                return await Load_Certificate();
-            }
-
-            internal static async Task<bool> Unload_Certificate_Initiator()
-            {
-                return await Unload_Certificate();
-            }
-        }
-
-        private sealed class Server_Functions_Mitigator:Server_Functions
-        {
-            internal static async Task<bool> Delete_Expired_Database_Items_Initiator()
-            {
-                return await Delete_Expired_Database_Items();
-            }
-        }
 
 
 
@@ -72,7 +39,7 @@ namespace University_Records_System_Server_Application
                 server_socket.Dispose();
             }
 
-            await Server_Variables_Mitigator.Unload_Certificate_Initiator();
+            await Unload_Certificate();
 
             server_shutdown = true;
         }
@@ -92,7 +59,7 @@ namespace University_Records_System_Server_Application
             {
                 if(server_main_loop != null)
                 {
-                    await Server_Variables_Mitigator.Load_Certificate_Initiator();
+                    await Load_Certificate();
 
                     server_main_loop.Elapsed += Server_main_loop_Elapsed;
                     server_main_loop.Interval = 100;
@@ -106,7 +73,7 @@ namespace University_Records_System_Server_Application
             {
                 if (server_main_loop != null)
                 {
-                    await Server_Variables_Mitigator.Unload_Certificate_Initiator();
+                    await Unload_Certificate();
 
                     server_main_loop.Elapsed -= Server_main_loop_Elapsed;
                     server_main_loop.Stop();
@@ -143,7 +110,7 @@ namespace University_Records_System_Server_Application
             {
                 System.Threading.Thread server_main_loop_thread = new System.Threading.Thread(async() =>
                 {
-                    await Server_Functions_Mitigator.Delete_Expired_Database_Items_Initiator();
+                    await Delete_Expired_Database_Items();
                 });
                 server_main_loop_thread.Priority = System.Threading.ThreadPriority.AboveNormal;
                 server_main_loop_thread.IsBackground = true;
@@ -194,11 +161,11 @@ namespace University_Records_System_Server_Application
 
                 System.Threading.Thread Server_Operation_Thread = new System.Threading.Thread(async () =>
                 {
-                    short Server_On_or_Off = await Server_Variables_Mitigator.Get_If_Server_Is_On_Or_Off();
+                    short Server_On_or_Off = await Get_If_Server_Is_On_Or_Off();
 
                     while (Server_On_or_Off == 1)
                     {
-                        Server_On_or_Off = await Server_Variables_Mitigator.Get_If_Server_Is_On_Or_Off();
+                        Server_On_or_Off = await Get_If_Server_Is_On_Or_Off();
 
                         if (server_socket != null)
                         {
@@ -216,7 +183,7 @@ namespace University_Records_System_Server_Application
             }
             catch
             {
-                await Server_Variables_Mitigator.Set_If_Server_Is_On_Or_Off(0);
+                On_Off = 0;
             }
 
 

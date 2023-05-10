@@ -6,25 +6,9 @@ using System.Threading.Tasks;
 
 namespace University_Records_System_Server_Application
 {
-    class Payload_Serialisation_and_Deserialisation
+    class Payload_Serialisation_and_Deserialisation:Server_Variables
     {
-
-        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
-        {
-            internal async static Task<bool> Error_Logs(Exception E, string function)
-            {
-                return await Server_Error_Logs(E, function);
-            }
-        }
-
-
-        protected static Task<byte[]> Serialise_Server_Payload()
-        {
-            return Task.FromResult(new byte[] { });
-        }
-
-
-        protected static async Task<Client_WSDL_Payload> Deserialise_Client_Payload(byte[] payload)
+        public async Task<Client_WSDL_Payload> Deserialise_Client_Payload(byte[] payload)
         {
             Client_WSDL_Payload client_payload = new Client_WSDL_Payload();
 
@@ -43,8 +27,7 @@ namespace University_Records_System_Server_Application
             }
             catch(Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Deserialise_Client_Payload");
-
+                await Server_Error_Logs(E, "Deserialise_Client_Payload");
                 if (payload_stream != null)
                 {
                     payload_stream.Close();
@@ -65,7 +48,7 @@ namespace University_Records_System_Server_Application
 
 
 
-        protected static async Task<byte[]> Serialise_Server_Payload(string content)
+        public async Task<byte[]> Serialise_Server_Payload(string content)
         {
 
             byte[] serialised_payload = Encoding.UTF8.GetBytes("FAILED");
@@ -85,8 +68,7 @@ namespace University_Records_System_Server_Application
             }
             catch(Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Serialise_Server_Payload");
-
+                await Server_Error_Logs(E, "Serialise_Server_Payload");
                 if (payload_stream != null)
                 {
                     payload_stream.Close();

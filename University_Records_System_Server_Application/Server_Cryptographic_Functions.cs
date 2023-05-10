@@ -6,21 +6,12 @@ using System.Threading.Tasks;
 
 namespace University_Records_System_Server_Application
 {
-    class Server_Cryptographic_Functions
+    class Server_Cryptographic_Functions:Server_Functions
     {
         private static System.Random random = new Random();
         private static string[] character_list = new string[] { "`", "¬", "¦", "!", "\"", "£", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "[", "{", "]", "}", ";", ":", "@", "'", "~", "#", "€", ",", "<", ".", ">", "?", "/", "\\", "|"};
         private static string[] lowercase_letters = new string[] {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
 
-
-
-        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
-        {
-            internal async static Task<bool> Error_Logs(Exception E, string function)
-            {
-                return await Server_Error_Logs(E, function);
-            }
-        }
 
 
 
@@ -62,7 +53,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Content_Hasher");
+                await Server_Error_Logs(E, "Serialise_Server_Payload");
             }
             finally
             {

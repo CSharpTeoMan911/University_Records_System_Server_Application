@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace University_Records_System_Server_Application
 {
-    class Server_Variables
+    class Server_Variables:Server_Logs_Writer
     {
         protected static System.Security.Cryptography.X509Certificates.X509Certificate2 server_certificate;
 
@@ -26,21 +26,35 @@ namespace University_Records_System_Server_Application
 
 
 
-
-
-        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
+        public static Task<System.Security.Cryptography.X509Certificates.X509Certificate2> Get_Server_Certificate()
         {
-            internal async static Task<bool> Error_Logs(Exception E, string function)
-            {
-                return await Server_Error_Logs(E, function);
-            }
+            return Task.FromResult(server_certificate);
+        }
+
+
+        public static Task<bool> Set_Server_Certificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
+        {
+            server_certificate = certificate;
+            return Task.FromResult(true);
+        }
+
+
+        public static Task<short> Get_If_Server_Is_On_Or_Off()
+        {
+            return Task.FromResult(On_Off);
         }
 
 
 
 
 
-        protected static Task<bool> Load_Certificate()
+
+
+
+
+
+
+        protected static async Task<bool> Load_Certificate()
         {
             string cert_name_segment = String.Empty;
 
@@ -58,31 +72,28 @@ namespace University_Records_System_Server_Application
 
                 server_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(Environment.CurrentDirectory + cert_name_segment, certificate_password);
 
-                return Task.FromResult(true);
+                return true;
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Load_Certificate_At_Startup");
-
-                return Task.FromResult(false);
+                await Server_Error_Logs(E, "Load_Certificate_At_Startup");
+                return false;
             }
 
         }
 
 
-        protected static Task<bool> Unload_Certificate()
+        protected static async Task<bool> Unload_Certificate()
         {
             try
             {
                 server_certificate.Dispose();
-
-                return Task.FromResult(true);
+                return true;
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Load_Certificate_At_Startup");
-
-                return Task.FromResult(false);
+                await Server_Error_Logs(E, "Load_Certificate_At_Startup");
+                return false;
             }
 
         }

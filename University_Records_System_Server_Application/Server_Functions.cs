@@ -6,50 +6,8 @@ using System.Threading.Tasks;
 
 namespace University_Records_System_Server_Application
 {
-    class Server_Functions
+    class Server_Functions:Client_Connections
     {
-
-        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
-        {
-            internal async static Task<bool> Error_Logs(Exception E, string function)
-            {
-                return await Server_Error_Logs(E, function);
-            }
-        }
-
-
-        private sealed class Server_Variables_Mitigator : Server_Variables
-        {
-            internal static Task<string> Get_SMTPS_Server_Email()
-            {
-                return Task.FromResult(SMTPS_Server_Email_Address);
-            }
-
-            internal static Task<string> Get_SMTPS_Server_Email_Password()
-            {
-                return Task.FromResult(SMTPS_Server_Email_Password);
-            }
-
-            internal static Task<System.Security.Cryptography.X509Certificates.X509Certificate2> Get_Server_Certificate()
-            {
-                return Task.FromResult(server_certificate);
-            }
-
-            internal static Task<string> Get_MySql_Username()
-            {
-                return Task.FromResult(MySql_Username);
-            }
-
-            internal static Task<string> Get_MySql_Password()
-            {
-                return Task.FromResult(MySql_Password);
-            }
-        }
-
-
-
-
-
         protected static async Task<string> SMTPS_Service(string random_key, string receipient_email_address, string function)
         {
             string SMTPS_Session_Result = String.Empty;
@@ -61,7 +19,7 @@ namespace University_Records_System_Server_Application
 
             try
             {
-                message.From.Add(new MimeKit.MailboxAddress("Student Records System", await Server_Variables_Mitigator.Get_SMTPS_Server_Email()));
+                message.From.Add(new MimeKit.MailboxAddress("Student Records System", SMTPS_Server_Email_Address));
                 message.To.Add(new MimeKit.MailboxAddress("User", receipient_email_address));
                 message.Subject = function.ToUpper() + " CODE";
                 message.Body = new MimeKit.TextPart("plain") {Text = "Your one time " + function + " code: " + random_key};
@@ -72,7 +30,7 @@ namespace University_Records_System_Server_Application
                 try
                 {
                     await client.ConnectAsync("smtp.gmail.com", 465, true);
-                    await client.AuthenticateAsync(await Server_Variables_Mitigator.Get_SMTPS_Server_Email(), await Server_Variables_Mitigator.Get_SMTPS_Server_Email_Password());
+                    await client.AuthenticateAsync(SMTPS_Server_Email_Address, SMTPS_Server_Email_Password);
                     await client.SendAsync(message);
                     await client.DisconnectAsync(true);
 
@@ -80,8 +38,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch(Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "SMTPS_Service");
-
+                    await Server_Error_Logs(E, "SMTPS_Service");
                     SMTPS_Session_Result = "SMTPS client socket connection failed";
 
                     if (client != null)
@@ -99,8 +56,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "SMTPS_Service");
-
+                await Server_Error_Logs(E, "SMTPS_Service");
                 SMTPS_Session_Result = "Message formatting failed";
             }
             finally
@@ -121,7 +77,7 @@ namespace University_Records_System_Server_Application
         {
 
 
-            MySqlConnector.MySqlConnection connection = new MySqlConnector.MySqlConnection("Server=localhost;UID=" + await Server_Variables_Mitigator.Get_MySql_Username() + ";Password=" + await Server_Variables_Mitigator.Get_MySql_Password() + ";Database=university_records_system");
+            MySqlConnector.MySqlConnection connection = new MySqlConnector.MySqlConnection("Server=localhost;UID=" + MySql_Username + ";Password=" + MySql_Password + ";Database=university_records_system");
 
 
             try
@@ -137,7 +93,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
+                    await Server_Error_Logs(E, "Delete_Expired_Database_Items");
                 }
                 finally
                 {
@@ -158,7 +114,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
+                    await Server_Error_Logs(E, "Delete_Expired_Database_Items");
                 }
                 finally
                 {
@@ -192,7 +148,7 @@ namespace University_Records_System_Server_Application
                     }
                     catch(Exception E)
                     {
-                        Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
+                        await Server_Error_Logs(E, "Delete_Expired_Database_Items");
 
                         if (load_expired_accounts_pending_for_validation_reader != null)
                         {
@@ -210,7 +166,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
+                    await Server_Error_Logs(E, "Delete_Expired_Database_Items");
                 }
                 finally
                 {
@@ -236,7 +192,7 @@ namespace University_Records_System_Server_Application
                     }
                     catch (Exception E)
                     {
-                        Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
+                        await Server_Error_Logs(E, "Delete_Expired_Database_Items");
                     }
                     finally
                     {
@@ -251,7 +207,7 @@ namespace University_Records_System_Server_Application
             }
             catch(Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Delete_Expired_Database_Items");
+                await Server_Error_Logs(E, "Delete_Expired_Database_Items");
             }
             finally
             {

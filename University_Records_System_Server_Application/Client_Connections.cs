@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Org.BouncyCastle.Asn1.X509.Qualified;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,54 +7,10 @@ using System.Threading.Tasks;
 
 namespace University_Records_System_Server_Application
 {
-    internal class Client_Connections
+    internal class Client_Connections:Server_Variables
     {
 
         private static System.Diagnostics.Stopwatch speed_checkup = new System.Diagnostics.Stopwatch();
-
-
-
-        protected sealed class Payload_Serialisation_and_Deserialisation_Mitigator:Payload_Serialisation_and_Deserialisation
-        {
-            internal static async Task<Client_WSDL_Payload> Deserialise_Client_Payload_Initiator(byte[] payload)
-            {
-                return await Deserialise_Client_Payload(payload);
-            }
-
-            internal static async Task<byte[]> Serialise_Server_Payload_Initiator(string payload)
-            {
-                return await Serialise_Server_Payload(payload);
-            }
-        }
-
-
-        private sealed class Server_Variables_Mitigator : Server_Variables
-        {
-            internal static Task<System.Security.Cryptography.X509Certificates.X509Certificate2> Get_Server_Certificate()
-            {
-                return Task.FromResult(server_certificate);
-            }
-        }
-
-
-        protected sealed class MySql_Connection_Initiator_Mitigator:MySql_Connection_Initiator
-        {
-            internal static async Task<Tuple<bool, string>> Initiate_MySql_Connection_Initiator<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
-            {
-                return await Initiate_MySql_Connection<Password__Or__Binary_Content>(email__or__log_in_session_key, password__or__binary_content, function);
-            }
-        }
-
-        private sealed class Server_Logs_Writer_Mitigator : Server_Logs_Writer
-        {
-            internal async static Task<bool> Error_Logs(Exception E, string function)
-            {
-                return await Server_Error_Logs(E, function);
-            }
-        }
-
-
-
 
 
 
@@ -86,7 +43,7 @@ namespace University_Records_System_Server_Application
 
                 try
                 {
-                    secure_client_stream.AuthenticateAsServer(await Server_Variables_Mitigator.Get_Server_Certificate(), false, System.Security.Authentication.SslProtocols.Tls11, true);
+                    secure_client_stream.AuthenticateAsServer(server_certificate, false, System.Security.Authentication.SslProtocols.Tls11, true);
 
 
                     int bytes_per_second = await Rount_Trip_Time_Calculator(secure_client_stream);
@@ -143,19 +100,19 @@ namespace University_Records_System_Server_Application
 
 
 
-
-                    Client_WSDL_Payload deserialised_client_payload = await Payload_Serialisation_and_Deserialisation_Mitigator.Deserialise_Client_Payload_Initiator(client_payload);
-
-
+                    
+                    Client_WSDL_Payload deserialised_client_payload = await Serialization_And_MySQL_Connection_Dispatcher_Controller.Deserialise_Client_Payload_Dispatcher(client_payload);
 
 
-                    Tuple<bool, string> mysql_extracted_data_and_type = await MySql_Connection_Initiator_Mitigator.Initiate_MySql_Connection_Initiator<string>(deserialised_client_payload.email__or__log_in_session_key, deserialised_client_payload.password__or__binary_content, deserialised_client_payload.function);
+
+
+                    Tuple<bool, string> mysql_extracted_data_and_type = await Serialization_And_MySQL_Connection_Dispatcher_Controller.Initiate_MySql_Connection_Dispatcher<string>(deserialised_client_payload.email__or__log_in_session_key, deserialised_client_payload.password__or__binary_content, deserialised_client_payload.function);
                     bool payload_type_is_binary_file = mysql_extracted_data_and_type.Item1;
                     string serialised_payload_content = mysql_extracted_data_and_type.Item2;
 
 
 
-                    byte[] serialised_payload = await Payload_Serialisation_and_Deserialisation_Mitigator.Serialise_Server_Payload_Initiator(serialised_payload_content);
+                    byte[] serialised_payload = await Serialization_And_MySQL_Connection_Dispatcher_Controller.Serialise_Server_Payload_Dispatcher(serialised_payload_content);
 
 
 
@@ -200,8 +157,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Operation_Selection");
-
+                    await Server_Error_Logs(E, "Operation_Selection");
                     if (secure_client_stream != null)
                     {
                         secure_client_stream.Close();
@@ -219,8 +175,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Operation_Selection");
-
+                await Server_Error_Logs(E, "Operation_Selection");
                 if (client_stream != null)
                 {
                     client_stream.Close();

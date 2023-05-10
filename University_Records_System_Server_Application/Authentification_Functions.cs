@@ -6,41 +6,8 @@ using System.Threading.Tasks;
 
 namespace University_Records_System_Server_Application
 {
-    class Authentification_Functions
+    class Authentification_Functions:Server_Cryptographic_Functions
     {
-
-        private sealed class Server_Functions_Mitigator:Server_Functions
-        {
-            internal static async Task<string> SMTPS_Service_Initiator(string random_key, string receipient_email_address, string function)
-            {
-                return await SMTPS_Service(random_key, receipient_email_address, function);
-            }
-        }
-
-
-
-        private sealed class Server_Cryptographic_Functions_Mitigator:Server_Cryptographic_Functions
-        {
-            internal static async Task<string> Create_Random_Key_Initiator()
-            {
-                return await Create_Random_Key();
-            }
-
-
-            internal static async Task<byte[]> Content_Hasher_Initiator(string content)
-            {
-                return await Content_Hasher(content);
-            }
-        }
-
-
-        private sealed class Server_Logs_Writer_Mitigator:Server_Logs_Writer
-        {
-            internal async static Task<bool> Error_Logs(Exception E, string function)
-            {
-                return await Server_Error_Logs(E, function);
-            }
-        }
 
 
 
@@ -62,7 +29,7 @@ namespace University_Records_System_Server_Application
                 {
                     while(await select_log_in_code_command_reader.ReadAsync() == true)
                     {
-                        if(Encoding.UTF8.GetString((byte[])select_log_in_code_command_reader["one_time_log_in_code"]) == Encoding.UTF8.GetString(await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(log_in_code)))
+                        if(Encoding.UTF8.GetString((byte[])select_log_in_code_command_reader["one_time_log_in_code"]) == Encoding.UTF8.GetString(await Content_Hasher(log_in_code)))
                         {
 
 
@@ -87,7 +54,7 @@ namespace University_Records_System_Server_Application
                                 try
                                 {
                                     insert_log_in_session_key.Parameters.AddWithValue("email", email);
-                                    insert_log_in_session_key.Parameters.AddWithValue("code", await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(log_in_session_key));
+                                    insert_log_in_session_key.Parameters.AddWithValue("code", await Content_Hasher(log_in_session_key));
 
                                     await insert_log_in_session_key.ExecuteNonQueryAsync();
 
@@ -95,7 +62,7 @@ namespace University_Records_System_Server_Application
                                 }
                                 catch(Exception E)
                                 {
-                                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Log_In_Account");
+                                    await Server_Error_Logs(E, "Log_In_Account");
                                 }
                                 finally
                                 {
@@ -108,7 +75,7 @@ namespace University_Records_System_Server_Application
                             }
                             catch (Exception E)
                             {
-                                Server_Logs_Writer_Mitigator.Error_Logs(E, "Log_In_Account");
+                                await Server_Error_Logs(E, "Log_In_Account");
                             }
                             finally
                             {
@@ -127,7 +94,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Log_In_Account");
+                    await Server_Error_Logs(E, "Log_In_Account");
 
                     if (select_log_in_code_command_reader != null)
                     {
@@ -146,7 +113,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Log_In_Account");
+                await Server_Error_Logs(E, "Log_In_Account");
             }
             finally
             {
@@ -179,7 +146,7 @@ namespace University_Records_System_Server_Application
                     if(await password_extraction_command_reader.ReadAsync() == true)
                     {
 
-                        if(Encoding.UTF8.GetString((byte[])password_extraction_command_reader["USER_PASSWORD"]) == Encoding.UTF8.GetString(await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(password)))
+                        if(Encoding.UTF8.GetString((byte[])password_extraction_command_reader["USER_PASSWORD"]) == Encoding.UTF8.GetString(await Content_Hasher(password)))
                         {
 
 
@@ -206,7 +173,7 @@ namespace University_Records_System_Server_Application
 
                                         string random_key = await Valid_Random_Key_Generator(connection, email);
 
-                                        string smtps_result = await Server_Functions_Mitigator.SMTPS_Service_Initiator(random_key, email, "log in");
+                                        string smtps_result = await SMTPS_Service(random_key, email, "log in");
 
 
 
@@ -218,7 +185,7 @@ namespace University_Records_System_Server_Application
                                             try
                                             {
                                                 log_in_session_key_insertion_command.Parameters.AddWithValue("email", email);
-                                                log_in_session_key_insertion_command.Parameters.AddWithValue("one_time_log_in_code", await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(random_key));
+                                                log_in_session_key_insertion_command.Parameters.AddWithValue("one_time_log_in_code", await Content_Hasher(random_key));
 
                                                 await log_in_session_key_insertion_command.ExecuteNonQueryAsync();
 
@@ -226,7 +193,7 @@ namespace University_Records_System_Server_Application
                                             }
                                             catch(Exception E)
                                             {
-                                                Server_Logs_Writer_Mitigator.Error_Logs(E, "Authentificate_User");
+                                                await Server_Error_Logs(E, "Authentificate_User");
                                             }
                                             finally
                                             {
@@ -250,7 +217,7 @@ namespace University_Records_System_Server_Application
                                 }
                                 catch (Exception E)
                                 {
-                                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Authentificate_User");
+                                    await Server_Error_Logs(E, "Authentificate_User");
 
                                     if (account_validation_checkup_command_reader != null)
                                     {
@@ -268,7 +235,7 @@ namespace University_Records_System_Server_Application
                             }
                             catch(Exception E)
                             {
-                                Server_Logs_Writer_Mitigator.Error_Logs(E, "Authentificate_User");
+                                await Server_Error_Logs(E, "Authentificate_User");
                             }
                             finally
                             {
@@ -290,7 +257,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Authentificate_User");
+                    await Server_Error_Logs(E, "Authentificate_User");
 
                     if (password_extraction_command_reader != null)
                     {
@@ -308,7 +275,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Authentificate_User");
+                await Server_Error_Logs(E, "Authentificate_User");
             }
             finally
             {
@@ -331,14 +298,14 @@ namespace University_Records_System_Server_Application
 
             try
             {
-                command.Parameters.AddWithValue("log_in_session_key", await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(log_in_session_key));
+                command.Parameters.AddWithValue("log_in_session_key", await Content_Hasher(log_in_session_key));
                 command.ExecuteNonQuery();
 
                 log_out_result = "Logged out";
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Log_Out_Account");
+                await Server_Error_Logs(E, "Log_Out_Account");
             }
             finally
             {
@@ -369,7 +336,7 @@ namespace University_Records_System_Server_Application
                 {
                     if(await reader.ReadAsync() == true)
                     {
-                        if(Encoding.UTF8.GetString((byte[])reader["one_time_account_validation_code"]) == Encoding.UTF8.GetString(await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(account_validation_key)))
+                        if(Encoding.UTF8.GetString((byte[])reader["one_time_account_validation_code"]) == Encoding.UTF8.GetString(await Content_Hasher(account_validation_key)))
                         {
                             await reader.CloseAsync();
 
@@ -387,8 +354,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Account_Validation");
-
+                    await Server_Error_Logs(E, "Account_Validation");
                     if (reader != null)
                     {
                         await reader.CloseAsync();
@@ -405,7 +371,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Account_Validation");
+                await Server_Error_Logs(E, "Account_Validation");
             }
             finally
             {
@@ -452,7 +418,7 @@ namespace University_Records_System_Server_Application
                             }
                             catch (Exception E)
                             {
-                                Server_Logs_Writer_Mitigator.Error_Logs(E, "Register_User");
+                                await Server_Error_Logs(E, "Register_User");
 
                                 registration_result = "Invalid email address";
                             }
@@ -466,13 +432,13 @@ namespace University_Records_System_Server_Application
 
 
                                   
-                                    string smtps_result = await Server_Functions_Mitigator.SMTPS_Service_Initiator(random_key, email, "register");
+                                    string smtps_result = await SMTPS_Service(random_key, email, "register");
 
 
                                     if (smtps_result == "SMTPS session successful")
                                     {
 
-                                        byte[] hashed_password = await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(password);
+                                        byte[] hashed_password = await Content_Hasher(password);
 
 
                                         query_command.Parameters.AddWithValue("email", email);
@@ -489,12 +455,12 @@ namespace University_Records_System_Server_Application
                                         try
                                         {
                                             move_account_to_validation_queue.Parameters.AddWithValue("email", email);
-                                            move_account_to_validation_queue.Parameters.AddWithValue("one_time_account_validation_code", await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(random_key));
+                                            move_account_to_validation_queue.Parameters.AddWithValue("one_time_account_validation_code", await Content_Hasher(random_key));
                                             await move_account_to_validation_queue.ExecuteNonQueryAsync();
                                         }
                                         catch (Exception E)
                                         {
-                                            Server_Logs_Writer_Mitigator.Error_Logs(E, "Register_User");
+                                            await Server_Error_Logs(E, "Register_User");
                                         }
                                         finally
                                         {
@@ -518,7 +484,7 @@ namespace University_Records_System_Server_Application
                         }
                         catch (Exception E)
                         {
-                            Server_Logs_Writer_Mitigator.Error_Logs(E, "Register_User");
+                            await Server_Error_Logs(E, "Register_User");
                         }
                         finally
                         {
@@ -536,7 +502,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Register_User");
+                    await Server_Error_Logs(E, "Register_User");
                 }
                 finally
                 {
@@ -550,7 +516,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Register_User");
+                await Server_Error_Logs(E, "Register_User");
             }
             finally
             {
@@ -570,7 +536,7 @@ namespace University_Records_System_Server_Application
 
             MySqlConnector.MySqlCommand command = new MySqlConnector.MySqlCommand("SELECT log_in_session_key FROM log_in_session_keys WHERE log_in_session_key = @log_in_session_key;", connection);
 
-            command.Parameters.AddWithValue("log_in_session_key", await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(log_in_session_key));
+            command.Parameters.AddWithValue("log_in_session_key", await Content_Hasher(log_in_session_key));
 
             try
             {
@@ -623,8 +589,8 @@ namespace University_Records_System_Server_Application
         {
         Valid_Random_Key_Generator:
 
-            string random_key = await Server_Cryptographic_Functions_Mitigator.Create_Random_Key_Initiator();
-            byte[] hashed_random_key = await Server_Cryptographic_Functions_Mitigator.Content_Hasher_Initiator(random_key);
+            string random_key = await Create_Random_Key();
+            byte[] hashed_random_key = await Content_Hasher(random_key);
 
 
 
@@ -661,8 +627,8 @@ namespace University_Records_System_Server_Application
                 }
                 catch (Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Valid_Random_Key_Generator");
-
+                    await Server_Error_Logs(E, "Valid_Random_Key_Generator");
+                    
                     if (verify_if_log_in_sessions_exists_command_reader != null)
                     {
                         await verify_if_log_in_sessions_exists_command_reader.CloseAsync();
@@ -680,7 +646,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Valid_Random_Key_Generator");
+                await Server_Error_Logs(E, "Valid_Random_Key_Generator");
             }
             finally
             {
@@ -719,8 +685,7 @@ namespace University_Records_System_Server_Application
                 }
                 catch(Exception E)
                 {
-                    Server_Logs_Writer_Mitigator.Error_Logs(E, "Valid_Random_Key_Generator");
-
+                    await Server_Error_Logs(E, "Valid_Random_Key_Generator");
                     if (verify_if_log_in_key_exists_command_reader != null)
                     {
                         await verify_if_log_in_key_exists_command_reader.CloseAsync();
@@ -738,7 +703,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                Server_Logs_Writer_Mitigator.Error_Logs(E, "Valid_Random_Key_Generator");
+                await Server_Error_Logs(E, "Valid_Random_Key_Generator");
             }
             finally
             {
