@@ -121,7 +121,7 @@ namespace University_Records_System_Server_Application
 
 
 
-        private static async Task<bool> Server_Operation()
+        private static Task<bool> Server_Operation()
         {
             try
             {
@@ -187,7 +187,7 @@ namespace University_Records_System_Server_Application
             }
 
 
-            return true;
+            return Task.FromResult(true);
         }
 
 
