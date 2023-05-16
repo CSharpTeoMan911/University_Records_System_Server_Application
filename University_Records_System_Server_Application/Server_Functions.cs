@@ -8,6 +8,40 @@ namespace University_Records_System_Server_Application
 {
     class Server_Functions:Client_Connections
     {
+        protected static Task<bool> Thread_Pool_Regulator()
+        {
+            int Worker_Threads = 0;
+            int Port_Threads = 0;
+
+            System.Threading.ThreadPool.GetAvailableThreads(out Worker_Threads, out Port_Threads);
+
+
+            if (Worker_Threads < 1000)
+            {
+                System.Threading.ThreadPool.SetMaxThreads(Worker_Threads + (1000 - Worker_Threads), Port_Threads);
+            }
+            else if (Worker_Threads > 1000)
+            {
+                System.Threading.ThreadPool.SetMaxThreads(Worker_Threads - (Worker_Threads - 1000), Port_Threads);
+            }
+
+
+
+            if (Port_Threads < 1000)
+            {
+                System.Threading.ThreadPool.SetMaxThreads(Worker_Threads, Port_Threads + (1000 - Port_Threads));
+            }
+            else if (Port_Threads > 1000)
+            {
+                System.Threading.ThreadPool.SetMaxThreads(Worker_Threads, Port_Threads - (Port_Threads - 1000));
+            }
+
+            return Task.FromResult(true);
+        }
+
+
+
+
         protected static async Task<string> SMTPS_Service(string random_key, string receipient_email_address, string function)
         {
             string SMTPS_Session_Result = String.Empty;

@@ -10,7 +10,7 @@ namespace University_Records_System_Server_Application
     {
       
 
-        public static string Main_Menu()
+        public static void Main_Menu()
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -48,40 +48,77 @@ namespace University_Records_System_Server_Application
             Console.Write("\n\n\t\t\t                [ - ] Input: ");
 
             Console.ForegroundColor = ConsoleColor.White;
-
-            string input = Console.ReadLine();
-            string return_value = String.Empty;
+        }
 
 
-            if (input == "S")
-            {
-                if (On_Off == 0)
-                {
-                    On_Off = 1;
-                    return_value = "Start";
-                }
-                else 
-                {
-                    On_Off = 0;
-                    return_value = "Stop";
-                }
-            }
-            else if (input == "O")
-            {
-                return_value = "Options menu";
-            }
-            else if (input == "E")
-            {
-                return_value = "Exit";
-            }
-            else
-            {
-                Main_Menu();
-            }
+        public static void Settings_Menu()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                          SETTINGS                        ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||     [ P ] Set the port number                            ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||     [ G ] Generate a self-signed SSL certificate         ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||     [ M ] Set MySql credentials                          ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||     [ E ] Exit the settings menu                         ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
 
 
-            return return_value;
-            
+
+
+        public static void Port_Setting_Menu()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                            PORT                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||     Enter the port number or [ E ] to exit               ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+
+
+        public static void Certificate_Loadup_Error()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                X509 CERTIFICATE NOT VALID                ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||     Enter the port number or [ E ] to exit               ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }
