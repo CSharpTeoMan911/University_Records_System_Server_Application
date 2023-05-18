@@ -10,7 +10,7 @@ namespace University_Records_System_Server_Application
     {
       
 
-        public static void Main_Menu()
+        public static Task<bool> Main_Menu()
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -48,6 +48,8 @@ namespace University_Records_System_Server_Application
             Console.Write("\n\n\t\t\t                [ - ] Input: ");
 
             Console.ForegroundColor = ConsoleColor.White;
+
+            return Task.FromResult(true);
         }
 
 
@@ -111,8 +113,55 @@ namespace University_Records_System_Server_Application
             Console.WriteLine("\t\t ||                X509 CERTIFICATE NOT VALID                ||");
             Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
             Console.WriteLine("\t\t ||                                                          ||");
-            Console.WriteLine("\t\t ||     Enter the port number or [ E ] to exit               ||");
+            Console.WriteLine("\t\t ||    The server SSL certificate does not exist or it is    ||");
+            Console.WriteLine("\t\t ||    not valid. Enter any key to exit.                     ||");
             Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+
+
+        public static void Certificate_Generation_Password_Menu()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                 X509 CERTIFICATE PASSWORD                ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter the server certificate's password that will be  ||");
+            Console.WriteLine("\t\t ||    used by the generated certificate.                    ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+
+
+        public static void Certificate_Generation_Expiry_Date_Menu()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                 X509 CERTIFICATE EXIPRY DATE             ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter the number of days that this certificate will   ||");
+            Console.WriteLine("\t\t ||    be valid.                                             ||");
             Console.WriteLine("\t\t ||                                                          ||");
             Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
 

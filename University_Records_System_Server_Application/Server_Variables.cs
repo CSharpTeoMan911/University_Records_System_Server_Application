@@ -70,11 +70,8 @@ namespace University_Records_System_Server_Application
 
 
         // METHOD THAT IS CREATING A X509 SSL CERTIFICATE THAT HAS SHA256 WITH RSA BASED ENCRYPTION
-        internal async Task<bool> Create_X509_Server_Certificate(string password, int certificate_valid_time_period_in_days)
+        internal static async void Create_X509_Server_Certificate(int certificate_valid_time_period_in_days)
         {
-
-            bool server_certificate_creation_successful = false;
-
 
             try
             {
@@ -140,15 +137,15 @@ namespace University_Records_System_Server_Application
 
                 try
                 {
-                    store.Save(certificate_memory_stream, password.ToCharArray(), random);
+                    store.Save(certificate_memory_stream, certificate_password.ToCharArray(), random);
                     await certificate_memory_stream.FlushAsync();
 
 
 
 
 
-                    System.Security.Cryptography.X509Certificates.X509Certificate2 client_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate_memory_stream.ToArray(), password.ToCharArray());
-                    byte[] client_certificate_binary_data = client_certificate.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert, new string(password.ToCharArray()));
+                    System.Security.Cryptography.X509Certificates.X509Certificate2 client_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate_memory_stream.ToArray(), certificate_password.ToCharArray());
+                    byte[] client_certificate_binary_data = client_certificate.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert, new string(certificate_password.ToCharArray()));
 
 
 
@@ -221,16 +218,11 @@ namespace University_Records_System_Server_Application
                         await certificate_memory_stream.DisposeAsync();
                     }
                 }
-
-                server_certificate_creation_successful = true;
             }
             catch
             {
 
             }
-
-
-            return server_certificate_creation_successful;
         }
 
 
