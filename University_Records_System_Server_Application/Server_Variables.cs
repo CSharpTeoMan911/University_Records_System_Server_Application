@@ -1,6 +1,7 @@
 ﻿using Org.BouncyCastle.Crypto.Prng;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,11 +17,11 @@ namespace University_Records_System_Server_Application
         protected static int port_number = 1024;
 
 
-        protected static string certificate_password = "k_e-i-y-91-11-80";
+        protected static string certificate_password;
 
 
-        protected static string MySql_Username = "stundent_records_server";
-        protected static string MySql_Password = "stundent_records_server";
+        protected static string MySql_Username;
+        protected static string MySql_Password;
 
 
         protected static string SMTPS_Server_Email_Address = "student.records.system.smtps@gmail.com";
@@ -44,25 +45,57 @@ namespace University_Records_System_Server_Application
         private static int strength = 2048;
 
 
+        private static string settings_file_name = "server_settings.json";
 
 
-        public static Task<System.Security.Cryptography.X509Certificates.X509Certificate2> Get_Server_Certificate()
+        public enum X509_Server_Certificate_Operations
         {
-            return Task.FromResult(server_certificate);
+            Create_X509_Server_Certificate,
+            Load_Certificate,
+            Unload_Certificate
+        }
+
+        public enum Settings_File_Options
+        {
+            Load_Settings_From_File,
+            Update_Settings_File
         }
 
 
-        public static Task<bool> Set_Server_Certificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
+
+
+
+        internal static async Task<bool> X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations operation)
         {
-            server_certificate = certificate;
-            return Task.FromResult(true);
+            bool Operation_Result = false;
+
+            switch(operation)
+            {
+                case X509_Server_Certificate_Operations.Load_Certificate:
+                    Operation_Result = await Load_Certificate();
+                    break;
+
+                case X509_Server_Certificate_Operations.Unload_Certificate:
+                    Operation_Result = await Unload_Certificate();
+                    break;
+            }
+
+            return Operation_Result;
         }
 
 
-        public static Task<short> Get_If_Server_Is_On_Or_Off()
+        internal static async Task<bool> X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations operation, int expiry_date_period)
         {
-            return Task.FromResult(On_Off);
+            bool Operation_Result = false;
+
+            if (operation == X509_Server_Certificate_Operations.Create_X509_Server_Certificate)
+            {
+                Operation_Result = await Create_X509_Server_Certificate(expiry_date_period);
+            }
+
+            return Operation_Result;
         }
+
 
 
 
@@ -70,8 +103,9 @@ namespace University_Records_System_Server_Application
 
 
         // METHOD THAT IS CREATING A X509 SSL CERTIFICATE THAT HAS SHA256 WITH RSA BASED ENCRYPTION
-        internal static async void Create_X509_Server_Certificate(int certificate_valid_time_period_in_days)
+        private static async Task<bool> Create_X509_Server_Certificate(int certificate_valid_time_period_in_days)
         {
+            bool Certificate_Generation_Is_Successful = true;
 
             try
             {
@@ -133,7 +167,7 @@ namespace University_Records_System_Server_Application
 
 
 
-                System.IO.MemoryStream certificate_memory_stream = new System.IO.MemoryStream();
+                MemoryStream certificate_memory_stream = new MemoryStream();
 
                 try
                 {
@@ -152,14 +186,17 @@ namespace University_Records_System_Server_Application
 
 
 
-                    System.IO.FileStream server_certificate_file_stream = System.IO.File.Create(server_certificate_name, (int)certificate_memory_stream.Length, System.IO.FileOptions.Asynchronous);
+                    FileStream server_certificate_file_stream = File.Create(server_certificate_name, (int)certificate_memory_stream.Length, FileOptions.Asynchronous);
                     try
                     {
                         await server_certificate_file_stream.WriteAsync(certificate_memory_stream.ToArray());
                         await server_certificate_file_stream.FlushAsync();
                     }
-                    catch
+                    catch (Exception E)
                     {
+                        await Server_Error_Logs(E, "Create_X509_Server_Certificate");
+                        Certificate_Generation_Is_Successful = false;
+
                         if (server_certificate_file_stream != null)
                         {
                             await server_certificate_file_stream.FlushAsync();
@@ -177,14 +214,17 @@ namespace University_Records_System_Server_Application
                     }
 
 
-                    System.IO.FileStream client_certificate_file_stream = System.IO.File.Create(client_certificate_name, client_certificate_binary_data.Length, System.IO.FileOptions.Asynchronous);
+                    FileStream client_certificate_file_stream = File.Create(client_certificate_name, client_certificate_binary_data.Length, FileOptions.Asynchronous);
                     try
                     {
                         await client_certificate_file_stream.WriteAsync(client_certificate_binary_data);
                         await client_certificate_file_stream.FlushAsync();
                     }
-                    catch
+                    catch (Exception E)
                     {
+                        await Server_Error_Logs(E, "Create_X509_Server_Certificate");
+                        Certificate_Generation_Is_Successful = false;
+
                         if (client_certificate_file_stream != null)
                         {
                             await client_certificate_file_stream.FlushAsync();
@@ -201,8 +241,11 @@ namespace University_Records_System_Server_Application
                         }
                     }
                 }
-                catch
+                catch (Exception E)
                 {
+                    await Server_Error_Logs(E, "Create_X509_Server_Certificate");
+                    Certificate_Generation_Is_Successful = false;
+
                     if (certificate_memory_stream != null)
                     {
                         await certificate_memory_stream.FlushAsync();
@@ -219,24 +262,28 @@ namespace University_Records_System_Server_Application
                     }
                 }
             }
-            catch
+            catch (Exception E)
             {
-
+                await Server_Error_Logs(E, "Create_X509_Server_Certificate");
+                Certificate_Generation_Is_Successful = false;
             }
+
+            return Certificate_Generation_Is_Successful;
         }
 
 
 
 
-        protected static async Task<bool> Load_Certificate()
+        private static async Task<bool> Load_Certificate()
         {
+            bool Certificate_Loadup_Is_Successful = false;
             string cert_name_segment = String.Empty;
 
 
             try
             {
-                /*
-                 
+
+
                 if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
                 {
                     cert_name_segment = "\\" + server_certificate_name;
@@ -246,43 +293,214 @@ namespace University_Records_System_Server_Application
                     cert_name_segment = "/" + server_certificate;
                 }
 
-                 */
-
-                if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
-                {
-                    cert_name_segment = "\\student-records-system-certificate.pfx";
-                }
-                else
-                {
-                    cert_name_segment = "/student-records-system-certificate.pfx";
-                }
 
                 server_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(Environment.CurrentDirectory + cert_name_segment, certificate_password);
+                Certificate_Loadup_Is_Successful = true;
 
-                return true;
             }
             catch (Exception E)
             {
                 await Server_Error_Logs(E, "Load_Certificate_At_Startup");
-                return false;
             }
 
+            return Certificate_Loadup_Is_Successful;
         }
 
 
-        protected static async Task<bool> Unload_Certificate()
+        private static async Task<bool> Unload_Certificate()
         {
+            bool Certificate_Unload_Is_Successful = false;
+
             try
             {
                 server_certificate?.Dispose();
-                return true;
+                Certificate_Unload_Is_Successful = true;
             }
             catch (Exception E)
             {
                 await Server_Error_Logs(E, "Load_Certificate_At_Startup");
-                return false;
             }
 
+            return Certificate_Unload_Is_Successful;
+        }
+
+
+
+
+
+        internal static async Task<bool> Settings_File_Controller(Settings_File_Options option)
+        {
+            bool Settings_File_Controller_Operation_Is_Successful = false;
+
+            switch(option)
+            {
+                case Settings_File_Options.Load_Settings_From_File:
+                    Settings_File_Controller_Operation_Is_Successful = await Load_Settings_From_File();
+                    break;
+
+                case Settings_File_Options.Update_Settings_File:
+                    Settings_File_Controller_Operation_Is_Successful = await Update_Settings_File();
+                    break;
+            }
+
+            return Settings_File_Controller_Operation_Is_Successful;
+        }
+
+
+
+
+        private static Task<bool> Grant_Settings_File_Permissions()
+        {
+            if (File.Exists(settings_file_name) == true)
+            {
+                if(System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                {
+                    FileInfo settings_file_info = new FileInfo(settings_file_name);
+
+                    System.Security.AccessControl.FileSecurity settings_file_security = settings_file_info.GetAccessControl();
+                    settings_file_security.AddAccessRule(new System.Security.AccessControl.FileSystemAccessRule(System.Security.Principal.WindowsIdentity.GetCurrent().Name, System.Security.AccessControl.FileSystemRights.Write, System.Security.AccessControl.AccessControlType.Allow));
+                    settings_file_security.AddAccessRule(new System.Security.AccessControl.FileSystemAccessRule(System.Security.Principal.WindowsIdentity.GetCurrent().Name, System.Security.AccessControl.FileSystemRights.Read, System.Security.AccessControl.AccessControlType.Allow));
+                    settings_file_security.AddAccessRule(new System.Security.AccessControl.FileSystemAccessRule(System.Security.Principal.WindowsIdentity.GetCurrent().Name, System.Security.AccessControl.FileSystemRights.Delete, System.Security.AccessControl.AccessControlType.Allow));
+                    settings_file_info.SetAccessControl(settings_file_security);
+                }
+                else
+                {
+                    File.SetUnixFileMode(settings_file_name, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+                }
+            }
+
+            return Task.FromResult(true);
+        }
+
+
+        private async static Task<bool> Create_Settings_File()
+        {
+            bool Create_Settings_File_Is_Successful = false;
+
+            if (File.Exists(settings_file_name) == false)
+            {
+                FileStream file_stream = File.Create(settings_file_name);
+
+                try
+                {
+
+                    Settings_File settings = new Settings_File();
+
+                    settings.port_number = port_number;
+                    settings.certificate_password = certificate_password;
+                    settings.MySql_Password = MySql_Password;
+                    settings.MySql_Username = MySql_Username;
+                    settings.SMTPS_Server_Email_Address = SMTPS_Server_Email_Address;
+                    settings.SMTPS_Server_Email_Password = SMTPS_Server_Email_Password;
+
+
+                    byte[] serialized_settings = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(settings));
+                    await file_stream.WriteAsync(serialized_settings, 0, serialized_settings.Length);
+
+                    Create_Settings_File_Is_Successful = true;
+                }
+                catch(Exception E)
+                {
+                    await Server_Error_Logs(E, "Create_Settings_File");
+                }
+                finally
+                {
+                    if (file_stream != null)
+                    {
+                        await file_stream.DisposeAsync();
+                    }
+                }
+
+
+                await Grant_Settings_File_Permissions();
+            }
+
+            return Create_Settings_File_Is_Successful;
+        }
+
+
+
+
+
+        private async static Task<bool> Update_Settings_File()
+        {
+            bool Update_Settings_File_Is_Successful = false;
+
+            try
+            {
+                await Grant_Settings_File_Permissions();
+
+
+                if (File.Exists(settings_file_name) == true)
+                {
+                    File.Delete(settings_file_name);
+                }
+
+
+                Update_Settings_File_Is_Successful = await Create_Settings_File();
+
+            }
+            catch (Exception E)
+            {
+                await Server_Error_Logs(E, "Update_Settings_File");
+            }
+
+
+            return Update_Settings_File_Is_Successful;
+        }
+
+
+        private async static Task<bool> Load_Settings_From_File()
+        {
+            bool Load_Settings_File_Is_Successful = false;
+
+            await Grant_Settings_File_Permissions();
+
+
+            if (File.Exists(settings_file_name) == true)
+            {
+
+                FileStream file_stream = File.Open(settings_file_name, FileMode.Open);
+
+                try
+                {
+                    byte[] serialized_file = new byte[file_stream.Length];
+                    await file_stream.ReadAsync(serialized_file, 0, serialized_file.Length);
+
+                    string serialized_file_string = Encoding.UTF8.GetString(serialized_file);
+
+                    Settings_File? settings = Newtonsoft.Json.JsonConvert.DeserializeObject<Settings_File>(serialized_file_string);
+
+                    if(settings != null)
+                    {
+                        port_number = settings.port_number;
+                        certificate_password = settings.certificate_password;
+                        MySql_Password = settings.MySql_Password;
+                        MySql_Username = settings.MySql_Username;
+                        SMTPS_Server_Email_Address = settings.SMTPS_Server_Email_Address;
+                        SMTPS_Server_Email_Password = settings.SMTPS_Server_Email_Password;
+
+                        Load_Settings_File_Is_Successful = true;
+                    }
+                }
+                catch (Exception E)
+                {
+                    await Server_Error_Logs(E, "Load_Settings_From_File");
+                }
+                finally
+                {
+                    if (file_stream != null)
+                    {
+                        file_stream.Dispose();
+                    }
+                }
+            }
+            else
+            {
+                Load_Settings_File_Is_Successful = await Create_Settings_File();
+            }
+
+            return Load_Settings_File_Is_Successful;
         }
 
     }

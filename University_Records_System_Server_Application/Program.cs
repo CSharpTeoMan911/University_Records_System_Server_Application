@@ -14,12 +14,14 @@ namespace University_Records_System_Server_Application
         static void Main()
         {
             AppDomain.CurrentDomain.ProcessExit += Shutdown;
-            Startup();
+            _= Startup().Result;
         }
 
-        private async static void Startup()
+        private async static Task<bool> Startup()
         {
+            await Settings_File_Controller(Settings_File_Options.Load_Settings_From_File);
             await Server_Initiation();
+            return true;
         }
 
         private static async void Shutdown(object? sender, EventArgs e)
@@ -36,7 +38,7 @@ namespace University_Records_System_Server_Application
                 server_socket.Dispose();
             }
 
-            await Unload_Certificate();
+            await X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations.Unload_Certificate);
 
             server_shutdown = true;
         }
@@ -54,6 +56,7 @@ namespace University_Records_System_Server_Application
             else if (input == "O")
             {
                 await Options_Menu();
+                await Server_Initiation();
             }
             else if (input == "E")
             {
@@ -75,29 +78,38 @@ namespace University_Records_System_Server_Application
             {
                 On_Off = 1;
 
-                /*
-                bool result = await Load_Certificate();
+                await Settings_File_Controller(Settings_File_Options.Load_Settings_From_File);
+                bool result = await X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations.Load_Certificate);
 
-                if(result == true)
+                if (result == true)
                 {
                     await Start_Main_Loop();
                     await Server_Operation();
                 }
                 else
                 {
+                    Server_GUI.Certificate_Loadup_Error();
+                    string input = Console.ReadLine();
 
+                    On_Off = 0;
+
+                    if (await Certificate_Generation_Menu() == false)
+                    {
+                        Server_GUI.Certificate_Generation_Unsuccessful();
+                        Console.ReadLine();
+                    }
+                    else
+                    {
+                        Server_GUI.Certificate_Generation_Successful();
+                        Console.ReadLine();
+                    }
                 }
-                */
-
-                await Load_Certificate();
-                await Start_Main_Loop();
-                await Server_Operation();
             }
             else
             {
                 On_Off = 0;
 
-                await Unload_Certificate();
+                await X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations.Unload_Certificate);
                 await Stop_Main_Loop();
 
                 server_socket?.Dispose();
@@ -117,15 +129,42 @@ namespace University_Records_System_Server_Application
 
             if(input == "P")
             {
-                
+                if(await Port_Setup_Menu() == false)
+                {
+                    Server_GUI.Port_Setup_Unsuccsessful();
+                    Console.ReadLine();
+                }
+                else
+                {
+                    Server_GUI.Port_Setup_Succsessful();
+                    Console.ReadLine();
+                }
             }
             else if (input == "G")
             {
-
+                if(await Certificate_Generation_Menu() == false)
+                {
+                    Server_GUI.Certificate_Generation_Unsuccessful();
+                    Console.ReadLine();
+                }
+                else
+                {
+                    Server_GUI.Certificate_Generation_Successful();
+                    Console.ReadLine();
+                }
             }
             else if (input == "M")
             {
-
+                if(await MySQL_Credentials_Setup_Menu() == false)
+                {
+                    Server_GUI.MySql_Credentials_Setup_Error();
+                    Console.ReadLine();
+                }
+                else
+                {
+                    Server_GUI.MySql_Credentials_Setup_Successful();
+                    Console.ReadLine();
+                }
             }
             else if (input == "E")
             {
@@ -137,6 +176,115 @@ namespace University_Records_System_Server_Application
             }
 
             return true;
+        }
+
+        private static async Task<bool> Port_Setup_Menu()
+        {
+            bool Is_Port_Settup_Successful = false;
+
+            Server_GUI.Port_Setting_Menu();
+
+            string input = Console.ReadLine();
+
+            if(input != "E")
+            {
+                try
+                {
+                    double converted_port_number = Convert.ToDouble(input);
+                    port_number = (int)converted_port_number;
+                    await Settings_File_Controller(Settings_File_Options.Update_Settings_File);
+                    Is_Port_Settup_Successful = true;
+                }
+                catch
+                {
+                    await Port_Setup_Menu();
+                }
+            }
+
+            return Is_Port_Settup_Successful;
+        }
+
+
+        private static async Task<bool> MySQL_Credentials_Setup_Menu()
+        {
+            bool Is_MySQL_Account_Setup_Successful = false;
+
+            Server_GUI.MySql_Username_Menu();
+
+            string mysql_username_input = Console.ReadLine();
+
+            if(mysql_username_input != "E")
+            {
+                Server_GUI.MySql_Password_Menu();
+
+                string mysql_password_input = Console.ReadLine();
+
+                if(mysql_username_input != "E")
+                {
+                    string mysql_username_buffer = MySql_Username;
+                    string mysql_password_buffer = MySql_Password;
+
+                    MySql_Username = mysql_username_input;
+                    MySql_Password = mysql_password_input;
+
+                    bool result = await MySql_Connection_Validation();
+
+                    if(result == true)
+                    {
+                        await Settings_File_Controller(Settings_File_Options.Update_Settings_File);
+                        Is_MySQL_Account_Setup_Successful = true;
+                    }
+                    else
+                    {
+                        MySql_Username = mysql_username_buffer;
+                        MySql_Password = mysql_password_buffer;
+                    }
+                }
+            }
+
+            return Is_MySQL_Account_Setup_Successful;
+        }
+
+
+
+
+        private static async Task<bool> Certificate_Generation_Menu()
+        {
+            bool Is_Certificate_Generation_Successful = false;
+
+            Server_GUI.Certificate_Generation_Password_Menu();
+
+            string password_input = Console.ReadLine();
+
+            if (password_input != "E")
+            {
+
+            Certificate_Generation_Expiry_Date_Setup:
+
+                Server_GUI.Certificate_Generation_Expiry_Date_Menu();
+
+                string expiry_date_input = Console.ReadLine();
+
+                if (expiry_date_input != "E")
+                {
+                    try
+                    {
+                        double converted_expiry_date_input = Convert.ToDouble(expiry_date_input);
+
+                        certificate_password = password_input;
+
+                        Is_Certificate_Generation_Successful = await Settings_File_Controller(Settings_File_Options.Update_Settings_File);
+
+                        Is_Certificate_Generation_Successful = await X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations.Create_X509_Server_Certificate, (int)converted_expiry_date_input);
+                    }
+                    catch
+                    {
+                        goto Certificate_Generation_Expiry_Date_Setup;
+                    }
+                }
+            }
+
+            return Is_Certificate_Generation_Successful;
         }
 
 
@@ -175,9 +323,8 @@ namespace University_Records_System_Server_Application
                                 await Operation_Selection(client);
                             }
                         }
-                        catch(Exception E)
+                        catch
                         {
-                            System.Diagnostics.Debug.WriteLine("Error: " + E.Message);
                             On_Off = 0;
                         }
                     }
@@ -218,23 +365,5 @@ namespace University_Records_System_Server_Application
             return Task.FromResult(true);
         }
 
-        private static Task<bool> Port_Setup()
-        {
-            Server_GUI.Port_Setting_Menu();
-
-            string input = Console.ReadLine();
-
-            try
-            {
-                double converted_port_number = Convert.ToDouble(input);
-                
-            }
-            catch
-            {
-
-            }
-
-            return Task.FromResult(true);
-        }
     }
 }

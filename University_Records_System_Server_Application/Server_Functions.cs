@@ -105,6 +105,31 @@ namespace University_Records_System_Server_Application
         }
 
 
+        protected static async Task<bool> MySql_Connection_Validation()
+        {
+            bool Is_MySql_Connection_Successful = false;
+
+            MySqlConnector.MySqlConnection connection = new MySqlConnector.MySqlConnection("Server=localhost;UID=" + MySql_Username + ";Password=" + MySql_Password + ";Database=university_records_system");
+
+            try
+            {
+                await connection.OpenAsync();
+                Is_MySql_Connection_Successful = true;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                if(connection != null)
+                {
+                    await connection.DisposeAsync();
+                }
+            }
+
+            return Is_MySql_Connection_Successful;
+        }
 
 
         protected static async Task<bool> Delete_Expired_Database_Items()

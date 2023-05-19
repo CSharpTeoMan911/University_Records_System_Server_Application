@@ -10,7 +10,7 @@ namespace University_Records_System_Server_Application
     {
       
 
-        public static Task<bool> Main_Menu()
+        public static void Main_Menu()
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -49,7 +49,6 @@ namespace University_Records_System_Server_Application
 
             Console.ForegroundColor = ConsoleColor.White;
 
-            return Task.FromResult(true);
         }
 
 
@@ -102,6 +101,70 @@ namespace University_Records_System_Server_Application
 
 
 
+        public static void Port_Setup_Unsuccsessful()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                       PORT SETUP                         ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    The port setup was cancelled.                         ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter any key to exit.                                ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+
+
+        public static void Port_Setup_Succsessful()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                       PORT SETUP                         ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    The port was set up successfully.                     ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter any key to exit.                                ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // X509 CERTIFICATE SETUP MENUS
+        //
+        // [ BEGIN ]
+
 
         public static void Certificate_Loadup_Error()
         {
@@ -140,6 +203,8 @@ namespace University_Records_System_Server_Application
             Console.WriteLine("\t\t ||    Enter the server certificate's password that will be  ||");
             Console.WriteLine("\t\t ||    used by the generated certificate.                    ||");
             Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter [ E ] to exit the configuration menu            ||");
+            Console.WriteLine("\t\t ||                                                          ||");
             Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
 
             Console.Write("\n\n\t\t\t                [ - ] Input: ");
@@ -157,11 +222,13 @@ namespace University_Records_System_Server_Application
             Console.ForegroundColor = ConsoleColor.Blue;
 
             Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
-            Console.WriteLine("\t\t ||                 X509 CERTIFICATE EXIPRY DATE             ||");
+            Console.WriteLine("\t\t ||                 X509 CERTIFICATE EXPIRY DATE             ||");
             Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
             Console.WriteLine("\t\t ||                                                          ||");
             Console.WriteLine("\t\t ||    Enter the number of days that this certificate will   ||");
             Console.WriteLine("\t\t ||    be valid.                                             ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter [ E ] to exit the configuration menu            ||");
             Console.WriteLine("\t\t ||                                                          ||");
             Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
 
@@ -169,5 +236,161 @@ namespace University_Records_System_Server_Application
 
             Console.ForegroundColor = ConsoleColor.White;
         }
+
+
+
+        public static void Certificate_Generation_Unsuccessful()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||              X509 CERTIFICATE GENERATION ERROR           ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    The X509 certificate unsucessful. The opertion was    ||");
+            Console.WriteLine("\t\t ||    cancelled or the OS is corrupted.                     ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter any key to exit.                                ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+        public static void Certificate_Generation_Successful()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||           X509 CERTIFICATE GENERATION SUCCESSFUL         ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    The X509 certificate was generated successfully.      ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter any key to exit.                                ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        // [ END ]
+
+
+
+
+
+
+
+
+
+
+
+        // MYSQL SETUP MENUS
+        //
+        // [ BEGIN ]
+
+        public static void MySql_Username_Menu()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                       MySQL USERNAME                     ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter the username of the MySQL account that the      ||");
+            Console.WriteLine("\t\t ||    server will use.                                      ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter [ E ] to exit the configuration menu            ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+
+        public static void MySql_Password_Menu()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                       MySQL PASSWORD                     ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter the password of the MySQL account that the      ||");
+            Console.WriteLine("\t\t ||    server will use.                                      ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter [ E ] to exit the configuration menu            ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        public static void MySql_Credentials_Setup_Error()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                         MySQL ERROR                      ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    The username and password entered are not valid or    ||");
+            Console.WriteLine("\t\t ||    the MySQL database management system does not         ||");
+            Console.WriteLine("\t\t ||    contain the [university_records_system] database.     ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter any key to exit.                                ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+
+        public static void MySql_Credentials_Setup_Successful()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                   MySQL SETUP SUCCESSFUL                 ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    The MySQL credentials were set successfully           ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter any key to exit.                                ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        // [ END ]
     }
 }

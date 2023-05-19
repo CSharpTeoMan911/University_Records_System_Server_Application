@@ -43,7 +43,7 @@ namespace University_Records_System_Server_Application
 
                 try
                 {
-                    secure_client_stream.AuthenticateAsServer(server_certificate, false, System.Security.Authentication.SslProtocols.Tls11, true);
+                    secure_client_stream.AuthenticateAsServer(server_certificate, false, System.Security.Authentication.SslProtocols.Tls12, true);
 
 
                     int bytes_per_second = await Rount_Trip_Time_Calculator(secure_client_stream);
