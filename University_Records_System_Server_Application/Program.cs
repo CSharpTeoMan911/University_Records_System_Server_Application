@@ -307,7 +307,7 @@ namespace University_Records_System_Server_Application
             System.Threading.Thread Server_Operation_Thread = new System.Threading.Thread(async () =>
             {
                 server_socket = new System.Net.Sockets.Socket(System.Net.Sockets.AddressFamily.InterNetwork, System.Net.Sockets.SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
-                server_socket.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 1024));
+                server_socket.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Any, 1024));
                 server_socket?.Listen(1000);
 
                 while (On_Off == 1)

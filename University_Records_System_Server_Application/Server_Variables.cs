@@ -290,11 +290,12 @@ namespace University_Records_System_Server_Application
                 }
                 else
                 {
-                    cert_name_segment = "/" + server_certificate;
+                    cert_name_segment = "/" + server_certificate_name;
                 }
 
 
-                server_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(Environment.CurrentDirectory + cert_name_segment, certificate_password);
+
+                server_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(AppDomain.CurrentDomain.BaseDirectory + cert_name_segment, certificate_password);
                 Certificate_Loadup_Is_Successful = true;
 
             }
