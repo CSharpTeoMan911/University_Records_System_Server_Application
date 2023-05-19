@@ -277,25 +277,27 @@ namespace University_Records_System_Server_Application
         private static async Task<bool> Load_Certificate()
         {
             bool Certificate_Loadup_Is_Successful = false;
-            string cert_name_segment = String.Empty;
+            StringBuilder certificate_name_segment_builder = new StringBuilder();
 
 
             try
             {
 
+                certificate_name_segment_builder.Append(Environment.CurrentDirectory);
 
                 if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
                 {
-                    cert_name_segment = "\\" + server_certificate_name;
+                    certificate_name_segment_builder.Append("\\");
                 }
                 else
                 {
-                    cert_name_segment = "/" + server_certificate_name;
+                    certificate_name_segment_builder.Append("/");
                 }
 
+                certificate_name_segment_builder.Append(server_certificate_name);
 
 
-                server_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(AppDomain.CurrentDomain.BaseDirectory + cert_name_segment, certificate_password);
+                server_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate_name_segment_builder.ToString(), certificate_password);
                 Certificate_Loadup_Is_Successful = true;
 
             }
