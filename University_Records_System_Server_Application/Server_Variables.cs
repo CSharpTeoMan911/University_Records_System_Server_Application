@@ -377,7 +377,7 @@ namespace University_Records_System_Server_Application
                 }
                 else
                 {
-                    File.SetUnixFileMode(settings_file_name, UnixFileMode.UserRead & UnixFileMode.UserWrite);
+                    File.SetUnixFileMode(settings_file_name, UnixFileMode.UserRead | UnixFileMode.UserWrite);
                 }
             }
 
