@@ -18,5 +18,6 @@ namespace University_Records_System_Server_Application
         public string SMTPS_Server_Email_Address;
         public string SMTPS_Server_Email_Password;
 
+        public Server_Variables.SMTPS_Provider SMTPS_Server_Service_Provider;
     }
 }

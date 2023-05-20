@@ -79,17 +79,59 @@ namespace University_Records_System_Server_Application
                 On_Off = 1;
 
                 await Settings_File_Controller(Settings_File_Options.Load_Settings_From_File);
-                bool result = await X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations.Load_Certificate);
 
-                if (result == true)
+                if (await X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations.Load_Certificate) == true)
                 {
-                    await Start_Main_Loop();
-                    await Server_Operation();
+                    if(await MySql_Connection_Validation() == true)
+                    {
+                        if(await Verify_SMTPS_Credentials(SMTPS_Server_Email_Address, SMTPS_Server_Email_Password) == true)
+                        {
+                            await Start_Main_Loop();
+                            await Server_Operation();
+                        }
+                        else
+                        {
+                            Server_GUI.SMTPS_Service_Setup_Unsuccessful();
+                            Console.ReadLine();
+
+                            On_Off = 0;
+
+                            if (await SMTPS_Credentials_Setup_Menu() == false)
+                            {
+                                Server_GUI.SMTPS_Service_Setup_Unsuccessful();
+                                Console.ReadLine();
+                            }
+                            else
+                            {
+                                Server_GUI.SMTPS_Service_Setup_Successful();
+                                Console.ReadLine();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Server_GUI.MySql_Credentials_Setup_Error();
+                        Console.ReadLine();
+
+                        On_Off = 0;
+
+                        if(await MySQL_Credentials_Setup_Menu() == false)
+                        {
+                            Server_GUI.MySql_Credentials_Setup_Error();
+                            Console.ReadLine();
+                        }
+                        else
+                        {
+                            Server_GUI.MySql_Credentials_Setup_Successful();
+                            Console.ReadLine();
+                        }
+                    }
+
                 }
                 else
                 {
                     Server_GUI.Certificate_Loadup_Error();
-                    string input = Console.ReadLine();
+                    Console.ReadLine();
 
                     On_Off = 0;
 
@@ -166,6 +208,19 @@ namespace University_Records_System_Server_Application
                     Console.ReadLine();
                 }
             }
+            else if (input == "S")
+            {
+                if (await SMTPS_Credentials_Setup_Menu() == false)
+                {
+                    Server_GUI.SMTPS_Service_Setup_Unsuccessful();
+                    Console.ReadLine();
+                }
+                else
+                {
+                    Server_GUI.SMTPS_Service_Setup_Successful();
+                    Console.ReadLine();
+                }
+            }
             else if (input == "E")
             {
                 await Server_Initiation();
@@ -177,6 +232,10 @@ namespace University_Records_System_Server_Application
 
             return true;
         }
+
+
+
+
 
         private static async Task<bool> Port_Setup_Menu()
         {
@@ -205,6 +264,104 @@ namespace University_Records_System_Server_Application
         }
 
 
+
+
+
+
+        private static async Task<bool> SMTPS_Credentials_Setup_Menu()
+        {
+            bool Is_SMTPS_Settup_Successful = false;
+
+
+
+
+            Server_GUI.SMTPS_Service_Provider_Menu();
+
+            string smtps_service_provider_input = Console.ReadLine();
+
+
+
+
+            if(smtps_service_provider_input != "E")
+            {
+                if(smtps_service_provider_input == "G" || smtps_service_provider_input == "M")
+                {
+
+
+
+                    Server_GUI.SMTPS_Email_Menu();
+
+                    string smtps_service_provider_email_input = Console.ReadLine();
+
+
+
+
+                    if(smtps_service_provider_email_input != "E")
+                    {
+
+
+                        Server_GUI.SMTPS_Password_Menu();
+
+                        string smtps_service_provider_password_input = Console.ReadLine();
+
+
+
+
+                        if(smtps_service_provider_password_input != "E")
+                        {
+                            if(smtps_service_provider_input != null)
+                            {
+                                if(smtps_service_provider_email_input != null)
+                                {
+                                    if(smtps_service_provider_password_input != null)
+                                    {
+                                        if (smtps_service_provider_input == "G")
+                                        {
+                                            SMTPS_Server_Service_Provider = SMTPS_Provider.Google;
+                                        }
+                                        else if (smtps_service_provider_input == "M")
+                                        {
+                                            SMTPS_Server_Service_Provider = SMTPS_Provider.Microsoft;
+                                        }
+
+
+
+                                        try
+                                        {
+                                            System.Net.Mail.MailAddress valid_email = new System.Net.Mail.MailAddress(smtps_service_provider_email_input);
+
+                                            if(await Verify_SMTPS_Credentials(smtps_service_provider_email_input, smtps_service_provider_password_input) == true)
+                                            {
+                                                SMTPS_Server_Email_Address = smtps_service_provider_email_input;
+
+                                                SMTPS_Server_Email_Password = smtps_service_provider_password_input;
+
+                                                Is_SMTPS_Settup_Successful =  await Settings_File_Controller(Settings_File_Options.Update_Settings_File);
+                                            }
+                                        }
+                                        catch { }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+                else
+                {
+                    await SMTPS_Credentials_Setup_Menu();
+                }
+            }
+
+
+
+            return Is_SMTPS_Settup_Successful;
+        }
+
+
+
+
+
         private static async Task<bool> MySQL_Credentials_Setup_Menu()
         {
             bool Is_MySQL_Account_Setup_Successful = false;
@@ -227,9 +384,8 @@ namespace University_Records_System_Server_Application
                     MySql_Username = mysql_username_input;
                     MySql_Password = mysql_password_input;
 
-                    bool result = await MySql_Connection_Validation();
 
-                    if(result == true)
+                    if(await MySql_Connection_Validation() == true)
                     {
                         await Settings_File_Controller(Settings_File_Options.Update_Settings_File);
                         Is_MySQL_Account_Setup_Successful = true;
@@ -307,7 +463,7 @@ namespace University_Records_System_Server_Application
             System.Threading.Thread Server_Operation_Thread = new System.Threading.Thread(async () =>
             {
                 server_socket = new System.Net.Sockets.Socket(System.Net.Sockets.AddressFamily.InterNetwork, System.Net.Sockets.SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
-                server_socket.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Any, 1024));
+                server_socket.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Any, port_number));
                 server_socket?.Listen(1000);
 
                 while (On_Off == 1)

@@ -1,4 +1,5 @@
-﻿using Org.BouncyCastle.Crypto.Prng;
+﻿using Org.BouncyCastle.Crypto.Agreement.Srp;
+using Org.BouncyCastle.Crypto.Prng;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,15 +18,17 @@ namespace University_Records_System_Server_Application
         protected static int port_number = 1024;
 
 
-        protected static string certificate_password;
+        protected static string certificate_password = String.Empty;
 
 
-        protected static string MySql_Username;
-        protected static string MySql_Password;
+        protected static string MySql_Username = String.Empty;
+        protected static string MySql_Password = String.Empty;
 
 
-        protected static string SMTPS_Server_Email_Address = "student.records.system.smtps@gmail.com";
-        protected static string SMTPS_Server_Email_Password = "hjtqpldmrvvcfdtm";
+        protected static string SMTPS_Server_Email_Address = String.Empty;
+        protected static string SMTPS_Server_Email_Password = String.Empty;
+
+        protected static SMTPS_Provider SMTPS_Server_Service_Provider = SMTPS_Provider.Google;
 
 
 
@@ -61,6 +64,12 @@ namespace University_Records_System_Server_Application
             Update_Settings_File
         }
 
+
+        public enum SMTPS_Provider
+        {
+            Google,
+            Microsoft
+        }
 
 
 
@@ -303,7 +312,7 @@ namespace University_Records_System_Server_Application
             }
             catch (Exception E)
             {
-                await Server_Error_Logs(E, "Load_Certificate_At_Startup");
+                await Server_Error_Logs(E, "Load_Certificate");
             }
 
             return Certificate_Loadup_Is_Successful;
@@ -368,7 +377,7 @@ namespace University_Records_System_Server_Application
                 }
                 else
                 {
-                    File.SetUnixFileMode(settings_file_name, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+                    File.SetUnixFileMode(settings_file_name, UnixFileMode.UserRead & UnixFileMode.UserWrite);
                 }
             }
 
@@ -395,6 +404,7 @@ namespace University_Records_System_Server_Application
                     settings.MySql_Username = MySql_Username;
                     settings.SMTPS_Server_Email_Address = SMTPS_Server_Email_Address;
                     settings.SMTPS_Server_Email_Password = SMTPS_Server_Email_Password;
+                    settings.SMTPS_Server_Service_Provider = SMTPS_Server_Service_Provider;
 
 
                     byte[] serialized_settings = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(settings));
@@ -439,7 +449,6 @@ namespace University_Records_System_Server_Application
                     File.Delete(settings_file_name);
                 }
 
-
                 Update_Settings_File_Is_Successful = await Create_Settings_File();
 
             }
@@ -482,6 +491,7 @@ namespace University_Records_System_Server_Application
                         MySql_Username = settings.MySql_Username;
                         SMTPS_Server_Email_Address = settings.SMTPS_Server_Email_Address;
                         SMTPS_Server_Email_Password = settings.SMTPS_Server_Email_Password;
+                        SMTPS_Server_Service_Provider = settings.SMTPS_Server_Service_Provider;
 
                         Load_Settings_File_Is_Successful = true;
                     }

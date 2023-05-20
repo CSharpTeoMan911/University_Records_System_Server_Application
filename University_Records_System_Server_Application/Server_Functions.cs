@@ -40,11 +40,57 @@ namespace University_Records_System_Server_Application
         }
 
 
+        protected static Task<bool> Verify_SMTPS_Credentials(string SMTPS_Email_Address, string SMTPS_Email_Password)
+        {
+            bool Are_SMTPS_Credentials_Valid = false;
 
+
+            MailKit.Net.Smtp.SmtpClient client = new MailKit.Net.Smtp.SmtpClient();
+
+            try
+            {
+                string service_provider = String.Empty;
+
+
+                switch (SMTPS_Server_Service_Provider)
+                {
+                    case SMTPS_Provider.Google:
+                        service_provider = "smtp.gmail.com";
+                        break;
+
+                    case SMTPS_Provider.Microsoft:
+                        service_provider = "smtp.office365.com";
+                        break;
+                }
+
+
+                client.Connect(service_provider, 587, MailKit.Security.SecureSocketOptions.StartTls);
+                client.Authenticate(SMTPS_Email_Address, SMTPS_Email_Password);
+                client.Disconnect(true);
+
+                Are_SMTPS_Credentials_Valid = true;
+            }
+            catch
+            {
+                Are_SMTPS_Credentials_Valid = false;
+            }
+            finally
+            {
+                if(client != null)
+                {
+                    client.Dispose();
+                }
+            }
+
+
+            return Task.FromResult(Are_SMTPS_Credentials_Valid);
+        }
 
         protected static async Task<string> SMTPS_Service(string random_key, string receipient_email_address, string function)
         {
             string SMTPS_Session_Result = String.Empty;
+
+            string service_provider = String.Empty;
 
             MimeKit.MimeMessage message = new MimeKit.MimeMessage();
 
@@ -53,20 +99,39 @@ namespace University_Records_System_Server_Application
 
             try
             {
+                StringBuilder message_body_builder = new StringBuilder();
+                message_body_builder.Append("Your one time ");
+                message_body_builder.Append(function);
+                message_body_builder.Append(" code: ");
+                message_body_builder.Append(random_key);
+
+
                 message.From.Add(new MimeKit.MailboxAddress("Student Records System", SMTPS_Server_Email_Address));
                 message.To.Add(new MimeKit.MailboxAddress("User", receipient_email_address));
                 message.Subject = function.ToUpper() + " CODE";
-                message.Body = new MimeKit.TextPart("plain") {Text = "Your one time " + function + " code: " + random_key};
+                message.Body = new MimeKit.TextPart("plain") {Text = message_body_builder.ToString()};
 
+                message_body_builder.Clear();
 
                 MailKit.Net.Smtp.SmtpClient client = new MailKit.Net.Smtp.SmtpClient();
 
                 try
                 {
-                    await client.ConnectAsync("smtp.gmail.com", 465, true);
-                    await client.AuthenticateAsync(SMTPS_Server_Email_Address, SMTPS_Server_Email_Password);
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
+                    switch(SMTPS_Server_Service_Provider)
+                    {
+                        case SMTPS_Provider.Google:
+                            service_provider = "smtp.gmail.com";
+                            break;
+
+                        case SMTPS_Provider.Microsoft:
+                            service_provider = "smtp.office365.com";
+                            break;
+
+                    }
+                    client.Connect(service_provider, 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    client.Authenticate(SMTPS_Server_Email_Address, SMTPS_Server_Email_Password);
+                    client.Send(message);
+                    client.Disconnect(true);
 
                     SMTPS_Session_Result = "SMTPS session successful";
                 }

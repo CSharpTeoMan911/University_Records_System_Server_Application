@@ -68,6 +68,8 @@ namespace University_Records_System_Server_Application
             Console.WriteLine("\t\t ||                                                          ||");
             Console.WriteLine("\t\t ||     [ M ] Set MySql credentials                          ||");
             Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||     [ S ] Set SMTPS credentials                          ||");
+            Console.WriteLine("\t\t ||                                                          ||");
             Console.WriteLine("\t\t ||     [ E ] Exit the settings menu                         ||");
             Console.WriteLine("\t\t ||                                                          ||");
             Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
@@ -381,6 +383,132 @@ namespace University_Records_System_Server_Application
             Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
             Console.WriteLine("\t\t ||                                                          ||");
             Console.WriteLine("\t\t ||    The MySQL credentials were set successfully           ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter any key to exit.                                ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        // [ END ]
+
+
+
+
+
+
+
+
+        // SMTPS SETUP MENUS
+        //
+        // [ BEGIN ]
+
+        public static void SMTPS_Email_Menu()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                         SMTPS EMAIL                      ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter the email of the SMTPS service account          ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter [ E ] to exit the configuration menu            ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        public static void SMTPS_Password_Menu()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                      SMTPS PASSWORD                      ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter the password of the SMTPS service account       ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter [ E ] to exit the configuration menu            ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+        public static void SMTPS_Service_Provider_Menu()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                         SMTPS EMAIL                      ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Select the SMTPS service provider.                    ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter [ G ] for Google                                ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter [ M ] for Microsoft                             ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter [ E ] to exit the configuration menu            ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+        public static void SMTPS_Service_Setup_Unsuccessful()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                         SMTPS ERROR                      ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    SMTPS setup is unsuccessful. The account provided     ||");
+            Console.WriteLine("\t\t ||    is not valid or an unknown error occured              ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    Enter any key to exit.                                ||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+
+            Console.Write("\n\n\t\t\t                [ - ] Input: ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+
+        public static void SMTPS_Service_Setup_Successful()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("\n\n\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                   SMTPS SETUP SUCCESSFUL                 ||");
+            Console.WriteLine("\t\t ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("\t\t ||                                                          ||");
+            Console.WriteLine("\t\t ||    The SMTPS service was set successfully                ||");
             Console.WriteLine("\t\t ||                                                          ||");
             Console.WriteLine("\t\t ||    Enter any key to exit.                                ||");
             Console.WriteLine("\t\t ||                                                          ||");
