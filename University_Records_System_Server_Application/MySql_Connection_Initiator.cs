@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Org.BouncyCastle.Security;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,10 @@ namespace University_Records_System_Server_Application
 {
     class MySql_Connection_Initiator:Authentification_Functions
     {
+        private static Student_Records_System_Functions student_functions = new Student_Records_System_Functions(new Student_Functions());
+        private static Student_Records_System_Functions courses_functions = new Student_Records_System_Functions(new Student_Functions());
+
+
         public async Task<Tuple<bool, string>> Initiate_MySql_Connection<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
         {
             bool is_binary_file = false;
