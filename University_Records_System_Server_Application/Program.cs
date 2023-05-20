@@ -96,16 +96,7 @@ namespace University_Records_System_Server_Application
 
                             On_Off = 0;
 
-                            if (await SMTPS_Credentials_Setup_Menu() == false)
-                            {
-                                Server_GUI.SMTPS_Service_Setup_Unsuccessful();
-                                Console.ReadLine();
-                            }
-                            else
-                            {
-                                Server_GUI.SMTPS_Service_Setup_Successful();
-                                Console.ReadLine();
-                            }
+                            await SMTPS_Credentials_Setup_Processing();
                         }
                     }
                     else
@@ -115,16 +106,7 @@ namespace University_Records_System_Server_Application
 
                         On_Off = 0;
 
-                        if(await MySQL_Credentials_Setup_Menu() == false)
-                        {
-                            Server_GUI.MySql_Credentials_Setup_Error();
-                            Console.ReadLine();
-                        }
-                        else
-                        {
-                            Server_GUI.MySql_Credentials_Setup_Successful();
-                            Console.ReadLine();
-                        }
+                        await MySQL_Credentials_Setup_Result_Processing();
                     }
 
                 }
@@ -135,16 +117,7 @@ namespace University_Records_System_Server_Application
 
                     On_Off = 0;
 
-                    if (await Certificate_Generation_Menu() == false)
-                    {
-                        Server_GUI.Certificate_Generation_Unsuccessful();
-                        Console.ReadLine();
-                    }
-                    else
-                    {
-                        Server_GUI.Certificate_Generation_Successful();
-                        Console.ReadLine();
-                    }
+                    await Certificate_Generation_Result_Processing();
                 }
             }
             else
@@ -171,55 +144,19 @@ namespace University_Records_System_Server_Application
 
             if(input == "P")
             {
-                if(await Port_Setup_Menu() == false)
-                {
-                    Server_GUI.Port_Setup_Unsuccsessful();
-                    Console.ReadLine();
-                }
-                else
-                {
-                    Server_GUI.Port_Setup_Succsessful();
-                    Console.ReadLine();
-                }
+                await Port_Setup_Result_Processing();
             }
             else if (input == "G")
             {
-                if(await Certificate_Generation_Menu() == false)
-                {
-                    Server_GUI.Certificate_Generation_Unsuccessful();
-                    Console.ReadLine();
-                }
-                else
-                {
-                    Server_GUI.Certificate_Generation_Successful();
-                    Console.ReadLine();
-                }
+                await Certificate_Generation_Result_Processing();
             }
             else if (input == "M")
             {
-                if(await MySQL_Credentials_Setup_Menu() == false)
-                {
-                    Server_GUI.MySql_Credentials_Setup_Error();
-                    Console.ReadLine();
-                }
-                else
-                {
-                    Server_GUI.MySql_Credentials_Setup_Successful();
-                    Console.ReadLine();
-                }
+                await MySQL_Credentials_Setup_Result_Processing();
             }
             else if (input == "S")
             {
-                if (await SMTPS_Credentials_Setup_Menu() == false)
-                {
-                    Server_GUI.SMTPS_Service_Setup_Unsuccessful();
-                    Console.ReadLine();
-                }
-                else
-                {
-                    Server_GUI.SMTPS_Service_Setup_Successful();
-                    Console.ReadLine();
-                }
+                await SMTPS_Credentials_Setup_Processing();
             }
             else if (input == "E")
             {
@@ -232,6 +169,74 @@ namespace University_Records_System_Server_Application
 
             return true;
         }
+
+
+        private static async Task<bool> Port_Setup_Result_Processing()
+        {
+            if (await Port_Setup_Menu() == false)
+            {
+                Server_GUI.Port_Setup_Unsuccsessful();
+                Console.ReadLine();
+            }
+            else
+            {
+                Server_GUI.Port_Setup_Succsessful();
+                Console.ReadLine();
+            }
+
+            return true;
+        }
+
+        private static async Task<bool> Certificate_Generation_Result_Processing()
+        {
+            if (await Certificate_Generation_Menu() == false)
+            {
+                Server_GUI.Certificate_Generation_Unsuccessful();
+                Console.ReadLine();
+            }
+            else
+            {
+                Server_GUI.Certificate_Generation_Successful();
+                Console.ReadLine();
+            }
+
+            return true;
+        }
+
+
+        private static async Task<bool> MySQL_Credentials_Setup_Result_Processing()
+        {
+            if (await MySQL_Credentials_Setup_Menu() == false)
+            {
+                Server_GUI.MySql_Credentials_Setup_Error();
+                Console.ReadLine();
+            }
+            else
+            {
+                Server_GUI.MySql_Credentials_Setup_Successful();
+                Console.ReadLine();
+            }
+
+            return true;
+        }
+
+
+        private static async Task<bool> SMTPS_Credentials_Setup_Processing()
+        {
+            if (await SMTPS_Credentials_Setup_Menu() == false)
+            {
+                Server_GUI.SMTPS_Service_Setup_Unsuccessful();
+                Console.ReadLine();
+            }
+            else
+            {
+                Server_GUI.SMTPS_Service_Setup_Successful();
+                Console.ReadLine();
+            }
+
+            return true;
+        }
+
 
 
 
