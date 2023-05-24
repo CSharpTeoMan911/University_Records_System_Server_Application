@@ -411,35 +411,54 @@ namespace University_Records_System_Server_Application
 
         private static async Task<bool> Certificate_Generation_Menu()
         {
+            // BUFFER WHERE THE RESULT OF THE OPERATION IS STORED
             bool Is_Certificate_Generation_Successful = false;
 
+            // GUI FOR THE X509 CERTIFICATE PASSWORD SELECTION MENU
             Server_GUI.Certificate_Generation_Password_Menu();
 
+            // STRING BUFFER WHERE THE INPUT OF THE PASSWORD SELECTION OPERATION IS STORED
             string password_input = Console.ReadLine();
 
+
+            // IF PASSWORD IS NOT E PROCEED FURTHER, ELSE TERMINATE THE OPERATION
             if (password_input != "E")
             {
 
             Certificate_Generation_Expiry_Date_Setup:
 
+                // GUI FOR THE X509 CERTIFICATE EXPIRY DATE SELECTION MENU
                 Server_GUI.Certificate_Generation_Expiry_Date_Menu();
 
+
+                // STRING BUFFER WHERE THE INPUT OF THE EXPIRY DATE SELECTION OPERATION IS STORED
                 string expiry_date_input = Console.ReadLine();
 
+
+                // IF EXPIRY DATE IS NOT E PROCEED FURTHER, ELSE TERMINATE THE OPERATION
                 if (expiry_date_input != "E")
                 {
                     try
                     {
+                        // CONVERT THE INPUT TO DOUBLE TO TEST IF IT IS A VALID INTEGER
                         double converted_expiry_date_input = Convert.ToDouble(expiry_date_input);
 
+
+                        // SET THE GLOBAL VARIABLE "certificate_password" AS THE INPUT PASSWORD
                         certificate_password = password_input;
 
+
+                        // UPDATE THE SETTINGS FILE OF THE APPLICATION WITH THE UPDATED VALUE OF THE GLOBAL VARIABLE "certificate_password"
                         Is_Certificate_Generation_Successful = await Settings_File_Controller(Settings_File_Options.Update_Settings_File);
 
+
+                        // GENERATE A X509 CERTIFICATE USING THE SET PASSWORD AND EXPIRY DATE
                         Is_Certificate_Generation_Successful = await X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations.Create_X509_Server_Certificate, (int)converted_expiry_date_input);
                     }
                     catch
                     {
+                        // IF THE EXPIRY DATE INPUT IS NOT A VALID INTEGER MOVE THE CURRENT EXECUTION POINT OF THE METHOD
+                        // BACK TO THE "Certificate_Generation_Expiry_Date_Setup" LABEL POINTER
                         goto Certificate_Generation_Expiry_Date_Setup;
                     }
                 }

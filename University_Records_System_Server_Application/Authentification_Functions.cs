@@ -11,7 +11,7 @@ namespace University_Records_System_Server_Application
 
 
 
-        protected static async Task<string> Log_In_Account(string email, string log_in_code, MySqlConnector.MySqlConnection connection)
+        internal async Task<string> Log_In_Account(string email, string log_in_code, MySqlConnector.MySqlConnection connection)
         {
             string log_in_result = "Connection error";
 
@@ -128,7 +128,7 @@ namespace University_Records_System_Server_Application
 
 
 
-        protected static async Task<string> Authentificate_User(string email, string password, MySqlConnector.MySqlConnection connection)
+        internal async Task<string> Authentificate_User(string email, string password, MySqlConnector.MySqlConnection connection)
         {
             string authentification_result = "Connection error";
 
@@ -290,7 +290,7 @@ namespace University_Records_System_Server_Application
 
 
 
-        protected static async Task<string> Log_Out_Account(string log_in_session_key, MySqlConnector.MySqlConnection connection)
+        internal async Task<string> Log_Out_Account(string log_in_session_key, MySqlConnector.MySqlConnection connection)
         {
             string log_out_result = "Connection error";
 
@@ -320,7 +320,7 @@ namespace University_Records_System_Server_Application
 
 
 
-        protected static async Task<string> Account_Validation(string email, string account_validation_key, MySqlConnector.MySqlConnection connection)
+        internal async Task<string> Account_Validation(string email, string account_validation_key, MySqlConnector.MySqlConnection connection)
         {
             string account_validation_result = "Connection error";
 
@@ -386,7 +386,7 @@ namespace University_Records_System_Server_Application
 
 
 
-        protected static async Task<string> Register_User(string email, string password, MySqlConnector.MySqlConnection connection)
+        internal async Task<string> Register_User(string email, string password, MySqlConnector.MySqlConnection connection)
         {
             string registration_result = "Connection error";
 
@@ -530,7 +530,7 @@ namespace University_Records_System_Server_Application
         }
 
 
-        protected static async Task<string> Log_In_Session_Key_Validation(string log_in_session_key, MySqlConnector.MySqlConnection connection)
+        internal async Task<string> Log_In_Session_Key_Validation(string log_in_session_key, MySqlConnector.MySqlConnection connection)
         {
             string Log_In_Session_Key_Validation_Result = "Connection error";
 
@@ -585,7 +585,7 @@ namespace University_Records_System_Server_Application
         }
 
 
-        protected static async Task<string> Valid_Random_Key_Generator(MySqlConnector.MySqlConnection connection, string email)
+        internal async Task<string> Valid_Random_Key_Generator(MySqlConnector.MySqlConnection connection, string email)
         {
         Valid_Random_Key_Generator:
 

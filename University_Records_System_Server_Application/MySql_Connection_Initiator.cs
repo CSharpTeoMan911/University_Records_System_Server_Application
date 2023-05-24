@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace University_Records_System_Server_Application
 {
-    class MySql_Connection_Initiator:Authentification_Functions
+    class MySql_Connection_Initiator:Server_Variables
     {
         private static Student_Records_System_Functions student_functions = new Student_Records_System_Functions(new Student_Functions());
         private static Student_Records_System_Functions courses_functions = new Student_Records_System_Functions(new Student_Functions());
+        private static Authentification_Functions authentification_functions = new Authentification_Functions();
 
 
         public async Task<Tuple<bool, string>> Initiate_MySql_Connection<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
@@ -28,27 +29,27 @@ namespace University_Records_System_Server_Application
                 switch(function)
                 {
                     case "Log In":
-                        function_result = await Authentificate_User(email__or__log_in_session_key, password__or__binary_content as string, connection);
+                        function_result = await authentification_functions.Authentificate_User(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Register":
-                        function_result = await Register_User(email__or__log_in_session_key, password__or__binary_content as string, connection);
+                        function_result = await authentification_functions.Register_User(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Account validation":
-                        function_result = await Account_Validation(email__or__log_in_session_key, password__or__binary_content as string, connection);
+                        function_result = await authentification_functions.Account_Validation(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Account log in":
-                        function_result = await Log_In_Account(email__or__log_in_session_key, password__or__binary_content as string, connection);
+                        function_result = await authentification_functions.Log_In_Account(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Account log out":
-                        function_result = await Log_Out_Account(email__or__log_in_session_key, connection);
+                        function_result = await authentification_functions.Log_Out_Account(email__or__log_in_session_key, connection);
                         break;
 
                     case "Log in session key validation":
-                        function_result = await Log_In_Session_Key_Validation(email__or__log_in_session_key, connection);
+                        function_result = await authentification_functions.Log_In_Session_Key_Validation(email__or__log_in_session_key, connection);
                         break;
                 }
             }

@@ -118,76 +118,82 @@ namespace University_Records_System_Server_Application
 
             try
             {
+
+                // CREATE RANDOM SERIAL NUMBER FOR THE CERTIFICATE USING A RANDOM NUMBER GENERATOR
                 Org.BouncyCastle.Security.SecureRandom random = new Org.BouncyCastle.Security.SecureRandom(randomGenerator);
-                Org.BouncyCastle.Math.BigInteger serialNumber = Org.BouncyCastle.Utilities.BigIntegers.CreateRandomInRange(Org.BouncyCastle.Math.BigInteger.One, Org.BouncyCastle.Math.BigInteger.ValueOf(int.MaxValue), random);
+                Org.BouncyCastle.Math.BigInteger serialNumber = Org.BouncyCastle.Utilities.BigIntegers.CreateRandomInRange(Org.BouncyCastle.Math.BigInteger.One, 
+                                                                                                                           Org.BouncyCastle.Math.BigInteger.ValueOf(int.MaxValue), random);
+
                 certificateGenerator.SetSerialNumber(serialNumber);
 
 
 
 
-
+                // SET THE CERTIFICATE AUTHORITY NAME AND THE SUBJECT NAME OF THE CERTIFICATE
                 certificateGenerator.SetIssuerDN(issuerDN);
                 certificateGenerator.SetSubjectDN(subjectDN);
 
 
 
+
+                // SET THE CERTIFICATE'S EXPIRATION DATE
                 DateTime notBefore = DateTime.UtcNow.Date;
                 DateTime notAfter = notBefore.AddDays(certificate_valid_time_period_in_days);
-
                 certificateGenerator.SetNotBefore(notBefore);
                 certificateGenerator.SetNotAfter(notAfter);
 
 
 
 
+                // GENERATE A RANDOM PRIVATE KEY WITH A 2048 BIT STRENGTH
                 Org.BouncyCastle.Crypto.KeyGenerationParameters keyGenerationParameters = new Org.BouncyCastle.Crypto.KeyGenerationParameters(random, strength);
-
                 Org.BouncyCastle.Crypto.Generators.RsaKeyPairGenerator keyPairGenerator = new Org.BouncyCastle.Crypto.Generators.RsaKeyPairGenerator();
                 keyPairGenerator.Init(keyGenerationParameters);
                 Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair subjectKeyPair = keyPairGenerator.GenerateKeyPair();
 
+
+
+                
+                // SET THE PUBLIC KEY OF THE CERTIFICATE AND GENERATE THE CERTIFICATE USING SHA256 HASHING ALGORITHM WITH THE RSA ALGORITHM
                 certificateGenerator.SetPublicKey(subjectKeyPair.Public);
-
-
                 Org.BouncyCastle.Crypto.ISignatureFactory signatureFactory = new Org.BouncyCastle.Crypto.Operators.Asn1SignatureFactory("SHA256WithRSA", subjectKeyPair.Private, random);
-
-
-
                 Org.BouncyCastle.X509.X509Certificate certificate = certificateGenerator.Generate(signatureFactory);
 
 
 
+
+                // BUNDLE THE CERTIFICATE AND OTHER ITEMS TOGHETER IN A PKCS12 FILE FORMAT IN ORDER FOR THE CERTIFICATE TO BE PROCESSED TOGETHER
                 Org.BouncyCastle.Pkcs.Pkcs12Store store = new Org.BouncyCastle.Pkcs.Pkcs12Store();
-
-
                 string friendlyName = certificate.SubjectDN.ToString();
-
-
-
                 Org.BouncyCastle.Pkcs.X509CertificateEntry certificateEntry = new Org.BouncyCastle.Pkcs.X509CertificateEntry(certificate);
                 store.SetCertificateEntry(friendlyName, certificateEntry);
-
-
-
-
                 store.SetKeyEntry(friendlyName, new Org.BouncyCastle.Pkcs.AsymmetricKeyEntry(subjectKeyPair.Private), new[] { certificateEntry });
 
 
 
 
-
+                // CREATE A "MemoryStream" OBJECT IN ORDER TO WRITE BINARY INFORMATION IN MEMORY
                 MemoryStream certificate_memory_stream = new MemoryStream();
 
                 try
                 {
+                    // STORE THE CERTIFICATE AND ALL BUNDLED ITEMS IN RAM MEMORY
                     store.Save(certificate_memory_stream, certificate_password.ToCharArray(), random);
+
+
+
+                    // FLUSH THE DATA FROM THE STREAM TO THE RAM MEMORY
                     await certificate_memory_stream.FlushAsync();
 
 
 
+                    // CREATE A "X509Certificate2" FROM THE X509 CERTIFICATE AND THE BUNDLED ITEMS IN THE RAM MEMORY 
+                    System.Security.Cryptography.X509Certificates.X509Certificate2 client_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate_memory_stream.ToArray(), 
+                                                                                                                                                                            certificate_password.ToCharArray());
 
 
-                    System.Security.Cryptography.X509Certificates.X509Certificate2 client_certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate_memory_stream.ToArray(), certificate_password.ToCharArray());
+
+                    // EXPORT THE "X509Certificate2" COMPOSED OUT OF THE X509 CERTIFICATE AND THE BUNDLED ITEMS AS BINARY INFORMATION IN A ".crt" FILE FORMAT WITHOUT THE PRIVATE KEY
                     byte[] client_certificate_binary_data = client_certificate.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert, new string(certificate_password.ToCharArray()));
 
 
@@ -195,11 +201,18 @@ namespace University_Records_System_Server_Application
 
 
 
+                    // CREATE A "FileStream" OBJECT IN ORDER TO STREAM BINART INFORMATION IN A FILE THAT IS CREATED DYNAMICALLY
                     FileStream server_certificate_file_stream = File.Create(server_certificate_name, (int)certificate_memory_stream.Length, FileOptions.Asynchronous);
                     try
                     {
+
+                        // WRITE THE X509 CERTIFICATE WITH THE BUNDLED ITEMS INSIDE THE SERVER CERTIFICATE FILE
                         await server_certificate_file_stream.WriteAsync(certificate_memory_stream.ToArray());
+
+
+                        // FLUSH THE BINARY DATA INSIDE THE "FileStream" IN THE SERVER CERTIFICATE FILE IN ORDER TO BE WRITTEN IN IT
                         await server_certificate_file_stream.FlushAsync();
+
                     }
                     catch (Exception E)
                     {
@@ -223,11 +236,18 @@ namespace University_Records_System_Server_Application
                     }
 
 
+
+                    // CREATE A "FileStream" OBJECT IN ORDER TO STREAM BINART INFORMATION IN A FILE THAT IS CREATED DYNAMICALLY
                     FileStream client_certificate_file_stream = File.Create(client_certificate_name, client_certificate_binary_data.Length, FileOptions.Asynchronous);
                     try
                     {
+                        //  WRITE THE X509 CERTIFICATE WITH THE BUNDLED ITEMS WITHOUT THE PRIVATE KEY INSIDE THE CLIENT CERTIFICATE FILE
                         await client_certificate_file_stream.WriteAsync(client_certificate_binary_data);
+
+
+                        // FLUSH THE BINARY DATA INSIDE THE "FileStream" IN THE CLIENT CERTIFICATE FILE IN ORDER TO BE WRITTEN IN IT
                         await client_certificate_file_stream.FlushAsync();
+
                     }
                     catch (Exception E)
                     {
