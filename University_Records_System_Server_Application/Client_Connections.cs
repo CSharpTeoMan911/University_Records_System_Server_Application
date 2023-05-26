@@ -19,7 +19,6 @@ namespace University_Records_System_Server_Application
         {
 
             byte[] response = Encoding.UTF8.GetBytes("OK");
-            byte[] is_binary_file = new byte[1024];
 
 
             client.ReceiveBufferSize = 32768;
@@ -49,16 +48,6 @@ namespace University_Records_System_Server_Application
                     int bytes_per_second = await Rount_Trip_Time_Calculator(secure_client_stream);
 
 
-                    await Calculate_Connection_Timeout(client, is_binary_file.Length, bytes_per_second);
-                    await secure_client_stream.ReadAsync(is_binary_file);
-
-
-
-                    await Calculate_Connection_Timeout(client, response.Length, bytes_per_second);
-                    await secure_client_stream.WriteAsync(response);
-
-
-
 
                     byte[] payload_length = new byte[1024];
                     await Calculate_Connection_Timeout(client, payload_length.Length, bytes_per_second);
@@ -78,29 +67,18 @@ namespace University_Records_System_Server_Application
                     byte[] client_payload = new byte[BitConverter.ToInt32(payload_length, 0)];
                     await Calculate_Connection_Timeout(client, client_payload.Length, bytes_per_second);
 
+                    int total_bytes_read = 0;
 
-                    switch (BitConverter.ToInt32(is_binary_file, 0))
+                    while (total_bytes_read < client_payload.Length)
                     {
-                        case 1:
-                            await Task.Run(() =>
-                            {
-                                for (int index = 0; index < client_payload.Length; index++)
-                                {
-                                    client_payload[index] = (byte)secure_client_stream.ReadByte();
-                                }
-                            });
-                            break;
-
-                        case 0:
-                            await secure_client_stream.ReadAsync(client_payload, 0, client_payload.Length);
-                            break;
+                        total_bytes_read += await secure_client_stream.ReadAsync(client_payload, total_bytes_read, client_payload.Length - total_bytes_read);
                     }
 
 
 
 
 
-                    
+
                     Client_WSDL_Payload deserialised_client_payload = await Serialization_And_MySQL_Connection_Dispatcher_Controller.Deserialise_Client_Payload_Dispatcher(client_payload);
 
 
@@ -132,23 +110,7 @@ namespace University_Records_System_Server_Application
 
 
                     await Calculate_Connection_Timeout(client, serialised_payload.Length, bytes_per_second);
-
-                    switch (payload_type_is_binary_file)
-                    {
-                        case true:
-                            await Task.Run(() =>
-                            {
-                                for (int index = 0; index < serialised_payload.Length; index++)
-                                {
-                                    secure_client_stream.WriteByte(serialised_payload[index]);
-                                }
-                            });
-                            break;
-
-                        case false:
-                            await secure_client_stream.WriteAsync(serialised_payload, 0, serialised_payload.Length);
-                            break;
-                    }
+                    await secure_client_stream.WriteAsync(serialised_payload, 0, serialised_payload.Length);
 
 
 
