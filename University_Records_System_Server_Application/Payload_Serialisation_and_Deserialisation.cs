@@ -8,6 +8,9 @@ namespace University_Records_System_Server_Application
 {
     class Payload_Serialisation_and_Deserialisation:Server_Variables
     {
+
+
+
         public async Task<Client_WSDL_Payload> Deserialise_Client_Payload(byte[] payload)
         {
             Client_WSDL_Payload client_payload = new Client_WSDL_Payload();
@@ -51,7 +54,7 @@ namespace University_Records_System_Server_Application
         public async Task<byte[]> Serialise_Server_Payload(string content)
         {
 
-            byte[] serialised_payload = Encoding.UTF8.GetBytes("FAILED");
+            byte[] serialised_payload = failed_message;
 
             System.IO.MemoryStream payload_stream = new System.IO.MemoryStream();
 

@@ -11,6 +11,7 @@ namespace University_Records_System_Server_Application
     {
 
         private static System.Diagnostics.Stopwatch speed_checkup = new System.Diagnostics.Stopwatch();
+        private static readonly byte[] response = Encoding.UTF8.GetBytes("OK");
 
 
 
@@ -18,7 +19,7 @@ namespace University_Records_System_Server_Application
         protected async static Task<Server_WSDL_Payload> Operation_Selection(System.Net.Sockets.Socket client)
         {
 
-            byte[] response = Encoding.UTF8.GetBytes("OK");
+            
 
 
             client.ReceiveBufferSize = 32768;
@@ -84,9 +85,7 @@ namespace University_Records_System_Server_Application
 
 
 
-                    Tuple<bool, string> mysql_extracted_data_and_type = await Serialization_And_MySQL_Connection_Dispatcher_Controller.Initiate_MySql_Connection_Dispatcher<string>(deserialised_client_payload.email__or__log_in_session_key, deserialised_client_payload.password__or__binary_content, deserialised_client_payload.function);
-                    bool payload_type_is_binary_file = mysql_extracted_data_and_type.Item1;
-                    string serialised_payload_content = mysql_extracted_data_and_type.Item2;
+                    string serialised_payload_content = await Serialization_And_MySQL_Connection_Dispatcher_Controller.Initiate_MySql_Connection_Dispatcher<string>(deserialised_client_payload.email__or__log_in_session_key, deserialised_client_payload.password__or__binary_content, deserialised_client_payload.function);
 
 
 

@@ -20,7 +20,7 @@ namespace University_Records_System_Server_Application
             return await Serialization_And_MySQL_Connection_Dispatcher.Dispatcher(payload);
         }
 
-        public static async Task<Tuple<bool, string>> Initiate_MySql_Connection_Dispatcher<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
+        public static async Task<string> Initiate_MySql_Connection_Dispatcher<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
         {
             return await Serialization_And_MySQL_Connection_Dispatcher.Dispatcher<Password__Or__Binary_Content>(email__or__log_in_session_key, password__or__binary_content, function);
         }

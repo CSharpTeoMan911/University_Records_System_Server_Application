@@ -14,7 +14,7 @@ namespace University_Records_System_Server_Application
         private static Authentification_Functions authentification_functions = new Authentification_Functions();
 
 
-        public async Task<Tuple<bool, string>> Initiate_MySql_Connection<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
+        public async Task<string> Initiate_MySql_Connection<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
         {
             bool is_binary_file = false;
             string function_result = String.Empty;
@@ -70,7 +70,7 @@ namespace University_Records_System_Server_Application
                 }
             }
 
-            return new Tuple<bool, string>(is_binary_file, function_result);
+            return function_result;
         }
     }
 }

@@ -11,6 +11,10 @@ namespace University_Records_System_Server_Application
 {
     class Server_Variables:Server_Logs_Writer
     {
+        protected static byte[] failed_message = Encoding.UTF8.GetBytes("FAILED");
+
+
+
         protected static System.Security.Cryptography.X509Certificates.X509Certificate2 server_certificate;
 
         protected static short On_Off;

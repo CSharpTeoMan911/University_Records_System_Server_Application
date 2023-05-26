@@ -15,6 +15,8 @@ namespace University_Records_System_Server_Application
 
 
 
+
+
         public static async Task<byte[]> Dispatcher(string content)
         {
             return await Payload_Serialisation_And_Deserialisation.Serialise_Server_Payload(content);
@@ -28,7 +30,7 @@ namespace University_Records_System_Server_Application
         }
 
 
-        public static async Task<Tuple<bool, string>> Dispatcher<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
+        public static async Task<string> Dispatcher<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
         {
             return await MySql_Connection_Initiator.Initiate_MySql_Connection(email__or__log_in_session_key, password__or__binary_content, function);
         }
