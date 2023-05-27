@@ -87,7 +87,7 @@ namespace University_Records_System_Server_Application
                         if(await Verify_SMTPS_Credentials(SMTPS_Server_Email_Address, SMTPS_Server_Email_Password) == true)
                         {
                             await Start_Main_Loop();
-                            await Server_Operation();
+                            Server_Operation();
                         }
                         else
                         {
@@ -481,25 +481,41 @@ namespace University_Records_System_Server_Application
 
 
 
-
-        private static Task<bool> Server_Operation()
+        // ACCEPT CLIENT CONNECTIONS
+        private static void Server_Operation()
         {
+
+            // CREATE A THREAD ON WHICH CLIENT CONNECTIONS ARE PROCESSED
             System.Threading.Thread Server_Operation_Thread = new System.Threading.Thread(async () =>
             {
+
+                // CREATE A NEW SOCKET OBJECT THAT IS SET TO USE IPV4 ON THE TCP PROTOCOL AND SET THE SOCKET TO SEND AND RECEIVE MESSAGES
                 server_socket = new System.Net.Sockets.Socket(System.Net.Sockets.AddressFamily.InterNetwork, System.Net.Sockets.SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
+
+                // BIND THE IP ADDRESS OF THE MACHINE AND SELECTED PORT NUMBER TO THE SOCKET
                 server_socket.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Any, port_number));
+
+                // SET THE SOCKET TO LISTEN FOR CONNECTIONS AND SET A BACKLOG OF 1000 CLIENTS THAT WILL WAIT IN QUEUE TO BE PROCESSED
                 server_socket?.Listen(1000);
 
+
+                // WHILE THE SERVER IS ON
                 while (On_Off == 1)
                 {
+
+                    // IF THE SERVER SOCKET OBJECT IS NOT NULL
                     if (server_socket != null)
                     {
                         try
                         {
+                            // ACCEPT THE INCOMING CLIENT CONNECTION AND STORE THE CONNECTION IN A SOCKET
                             System.Net.Sockets.Socket? client = await server_socket.AcceptAsync();
 
+                            // IF THE CLIENT CONNECTION SOCKET IS NOT NULL
                             if (client != null)
                             {
+
+                                // CALL THE "Operation_Selection" METHOD TO PROCESS THE CLIENT REQUEST
                                 await Operation_Selection(client);
                             }
                         }
@@ -513,9 +529,6 @@ namespace University_Records_System_Server_Application
             Server_Operation_Thread.Priority = System.Threading.ThreadPriority.Highest;
             Server_Operation_Thread.IsBackground = false;
             Server_Operation_Thread.Start();
-
-
-            return Task.FromResult(true);
         }
 
 
