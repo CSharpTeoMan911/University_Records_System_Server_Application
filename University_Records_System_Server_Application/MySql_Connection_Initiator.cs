@@ -14,9 +14,9 @@ namespace University_Records_System_Server_Application
         private static Authentification_Functions authentification_functions = new Authentification_Functions();
 
 
+
         public async Task<string> Initiate_MySql_Connection<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
         {
-            bool is_binary_file = false;
             string function_result = String.Empty;
 
             MySqlConnector.MySqlConnection connection = new MySqlConnector.MySqlConnection("Server=localhost;UID=" + MySql_Username + ";Password=" + MySql_Password + ";Database=university_records_system");
@@ -51,6 +51,37 @@ namespace University_Records_System_Server_Application
                     case "Log in session key validation":
                         function_result = await authentification_functions.Log_In_Session_Key_Validation(email__or__log_in_session_key, connection);
                         break;
+
+                    case "Insert student":
+                        break;
+
+                    case "Delete student":
+                        break;
+
+                    case "Select student":
+                        break;
+
+                    case "Select students":
+                        break;
+
+                    case "Update student grades":
+                        break;
+
+                    case "Insert course":
+                        break;
+
+                    case "Delete course":
+                        break;
+
+                    case "Select course":
+                        break;
+
+                    case "Select courses":
+                        break;
+
+                    case "Update course module":
+                        break;
+
                 }
             }
             catch (Exception E)

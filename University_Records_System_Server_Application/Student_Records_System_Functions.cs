@@ -36,5 +36,10 @@ namespace University_Records_System_Server_Application
         {
             return await functions.Select_Value_From_MySql_Database(log_in_session_key, value, connection);
         }
+
+        public async Task<bool> Modify_Entity_Data_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
+        {
+            return await functions.Modify_Entity_Data(log_in_session_key, value, connection);
+        }
     }
 }

@@ -472,7 +472,7 @@ namespace University_Records_System_Server_Application
 
         private static async void Server_main_loop_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            if(server_shutdown == false)
+            if (server_shutdown == false)
             {
                 await Delete_Expired_Database_Items();
                 await Thread_Pool_Regulator();
@@ -535,7 +535,7 @@ namespace University_Records_System_Server_Application
 
         private static Task<bool> Start_Main_Loop()
         {
-            if (server_main_loop != null)
+            if (server_main_loop == null)
             {
                 server_main_loop = new System.Timers.Timer();
                 server_main_loop.Elapsed += Server_main_loop_Elapsed;

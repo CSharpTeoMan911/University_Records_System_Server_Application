@@ -346,17 +346,22 @@ namespace University_Records_System_Server_Application
             return true;
         }
 
-        /*
+        
         protected static async Task<bool> Delete_Expired_Log_In_Session_Keys_Accounts()
         {
-
+            return true;
         }
 
         protected static async Task<bool> Delete_Expired_Pending_Log_In_Sessions_Accounts()
         {
-
+            return true;
         }
-        */
+
+
+        protected static async Task<bool> Delete_Expired_Accounts_Pending_For_Validation_Accounts()
+        {
+            return true;
+        }
 
     }
 }

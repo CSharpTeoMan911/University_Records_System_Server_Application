@@ -28,5 +28,9 @@ namespace University_Records_System_Server_Application
         {
             return true;
         }
+        public async Task<bool> Modify_Entity_Data(string log_in_session_key, string value, MySqlConnection connection)
+        {
+            return true;
+        }
     }
 }
