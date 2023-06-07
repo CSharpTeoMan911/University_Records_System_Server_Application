@@ -64,7 +64,7 @@ namespace University_Records_System_Server_Application
                     case "Select students":
                         break;
 
-                    case "Update student grades":
+                    case "Update student data":
                         break;
 
                     case "Insert course":
@@ -79,7 +79,37 @@ namespace University_Records_System_Server_Application
                     case "Select courses":
                         break;
 
-                    case "Update course module":
+                    case "Update course data":
+                        break;
+
+                    case "Insert grade":
+                        break;
+
+                    case "Delete grade":
+                        break;
+
+                    case "Select grade":
+                        break;
+
+                    case "Select grades":
+                        break;
+
+                    case "Update grade data":
+                        break;
+
+                    case "Insert module":
+                        break;
+
+                    case "Delete module":
+                        break;
+
+                    case "Select module":
+                        break;
+
+                    case "Select modules":
+                        break;
+
+                    case "Update modules data":
                         break;
 
                 }
