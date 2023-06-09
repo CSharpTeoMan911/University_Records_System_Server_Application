@@ -54,7 +54,7 @@ namespace University_Records_System_Server_Application
 
                 if (course != null)
                 {
-                    if(course.duration <= 7)
+                    if(course.duration <= 7 && course.duration > 0)
                     {
                         MySqlCommand Command = new MySqlCommand("INSERT INTO departments_courses VALUES(@course_ID, @course_Department, @postgraduate, @location, @duration);", connection);
                         try

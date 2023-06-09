@@ -57,7 +57,7 @@ namespace University_Records_System_Server_Application
 
                 if (grade != null)
                 {
-                    if(grade.student_grade <= 100)
+                    if(grade.student_grade <= 100 && grade.student_grade > 0)
                     {
                         MySqlCommand Command = new MySqlCommand("INSERT INTO courses_grades VALUES(@grade_id, @student_ID, @course_ID, @subject_module, @student_grade);", connection);
                         try
@@ -74,10 +74,14 @@ namespace University_Records_System_Server_Application
                         }
                         catch (Exception E)
                         {
-                            await Server_Error_Logs(E, "Log_In_Session_Key_Validation");
+                            await Server_Error_Logs(E, "Insert_Value_In_MySql_Database");
                             if (E.Message.Contains("Duplicate entry") == true)
                             {
-                                value_insertion_result = "Course already exists";
+                                value_insertion_result = "Grade already exists";
+                            }
+                            else if(E.Message.Contains("Cannot add or update a child row: a foreign key constraint fails") == true)
+                            {
+                                value_insertion_result = "Course does not exist";
                             }
                         }
                         finally
