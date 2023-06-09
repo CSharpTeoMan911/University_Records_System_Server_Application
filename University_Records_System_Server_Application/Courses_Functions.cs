@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace University_Records_System_Server_Application
 {
-    internal class Courses_Functions : Functionality_Operators
+    internal class Courses_Functions: Server_Cryptographic_Functions, Functionality_Operators
     {
         Authentification_Functions authentification_functions = new Authentification_Functions();
 
@@ -27,9 +27,9 @@ namespace University_Records_System_Server_Application
 
                     value_deletion_result = "Value deletion successful";
                 }
-                catch
+                catch (Exception E)
                 {
-
+                    await Server_Error_Logs(E, "Delete_Value_From_MySql_Database");
                 }
                 finally
                 {
@@ -54,32 +54,41 @@ namespace University_Records_System_Server_Application
 
                 if (course != null)
                 {
-                    MySqlCommand Command = new MySqlCommand("INSERT INTO departments_courses VALUES(@course_ID, @course_Department, @postgraduate, @location, @duration);", connection);
-                    try
+                    if(course.duration <= 7)
                     {
-                        Command.Parameters.AddWithValue("course_ID", course.course_ID);
-                        Command.Parameters.AddWithValue("course_Department", course.course_Department);
-                        Command.Parameters.AddWithValue("postgraduate", course.postgraduate);
-                        Command.Parameters.AddWithValue("location", course.location);
-                        Command.Parameters.AddWithValue("duration", course.duration);
-
-                        await Command.ExecuteNonQueryAsync();
-
-                        value_insertion_result = "Value inserted";
-                    }
-                    catch (Exception E)
-                    {
-                        if (E.Message.Contains("Duplicate entry") == true)
+                        MySqlCommand Command = new MySqlCommand("INSERT INTO departments_courses VALUES(@course_ID, @course_Department, @postgraduate, @location, @duration);", connection);
+                        try
                         {
-                            value_insertion_result = "Course already exists";
+                            Command.Parameters.AddWithValue("course_ID", course.course_ID);
+                            Command.Parameters.AddWithValue("course_Department", course.course_Department);
+                            Command.Parameters.AddWithValue("postgraduate", course.postgraduate);
+                            Command.Parameters.AddWithValue("location", course.location);
+                            Command.Parameters.AddWithValue("duration", course.duration);
+
+                            await Command.ExecuteNonQueryAsync();
+
+                            value_insertion_result = "Value inserted";
+                        }
+                        catch (Exception E)
+                        {
+                            await Server_Error_Logs(E, "Insert_Value_In_MySql_Database");
+
+                            if (E.Message.Contains("Duplicate entry") == true)
+                            {
+                                value_insertion_result = "Course already exists";
+                            }
+                        }
+                        finally
+                        {
+                            if (Command != null)
+                            {
+                                await Command.DisposeAsync();
+                            }
                         }
                     }
-                    finally
+                    else
                     {
-                        if (Command != null)
-                        {
-                            await Command.DisposeAsync();
-                        }
+                        value_insertion_result = "Exceeded maximum duration";
                     }
                 }
             }
@@ -124,9 +133,9 @@ namespace University_Records_System_Server_Application
 
                         values_selection_result = Newtonsoft.Json.JsonConvert.SerializeObject(courses);
                     }
-                    catch
+                    catch (Exception E)
                     {
-
+                        await Server_Error_Logs(E, "Select_Values_From_MySql_Database");
                     }
                     finally
                     {
@@ -136,9 +145,9 @@ namespace University_Records_System_Server_Application
                         }
                     }
                 }
-                catch
+                catch (Exception E)
                 {
-
+                    await Server_Error_Logs(E, "Select_Values_From_MySql_Database");
                 }
                 finally
                 {
@@ -165,47 +174,49 @@ namespace University_Records_System_Server_Application
                 if (course != null)
                 {
 
-                    MySqlCommand Command = new MySqlCommand("UPDATE departments_courses SET course_Department = @course_Department, postgraduate = @postgraduate, location = @location, duration = @duration WHERE course_ID = @course_ID;", connection);
-
-                    try
+                    if (course.duration <= 7)
                     {
-                        Command.Parameters.AddWithValue("course_ID", course.course_ID);
-                        Command.Parameters.AddWithValue("course_Department", course.course_Department);
-                        Command.Parameters.AddWithValue("postgraduate", course.postgraduate);
-                        Command.Parameters.AddWithValue("location", course.location);
-                        Command.Parameters.AddWithValue("duration", course.duration);
+                        MySqlCommand Command = new MySqlCommand("UPDATE departments_courses SET course_Department = @course_Department, postgraduate = @postgraduate, location = @location, duration = @duration WHERE course_ID = @course_ID;", connection);
 
-                        await Command.ExecuteNonQueryAsync();
-
-                        value_modification_result = "Value modification successful";
-                    }
-                    catch (Exception E)
-                    {
-
-                        if (E.Message.Contains("Cannot add or update a child row: a foreign key constraint fails") == true)
+                        try
                         {
-                            value_modification_result = "Course does not exist";
+                            Command.Parameters.AddWithValue("course_ID", course.course_ID);
+                            Command.Parameters.AddWithValue("course_Department", course.course_Department);
+                            Command.Parameters.AddWithValue("postgraduate", course.postgraduate);
+                            Command.Parameters.AddWithValue("location", course.location);
+                            Command.Parameters.AddWithValue("duration", course.duration);
+
+                            await Command.ExecuteNonQueryAsync();
+
+                            value_modification_result = "Value modification successful";
+                        }
+                        catch (Exception E)
+                        {
+                            await Server_Error_Logs(E, "Modify_Entity_Data");
+
+                            if (E.Message.Contains("Cannot add or update a child row: a foreign key constraint fails") == true)
+                            {
+                                value_modification_result = "Course does not exist";
+                            }
+                        }
+                        finally
+                        {
+                            if (Command != null)
+                            {
+                                await Command.DisposeAsync();
+                            }
                         }
                     }
-                    finally
+                    else
                     {
-                        if (Command != null)
-                        {
-                            await Command.DisposeAsync();
-                        }
+                        value_modification_result = "Exceeded maximum duration";
                     }
+
                 }
             }
 
             return value_modification_result;
         }
 
-        public async Task<string> Select_Values_By_Criteria_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
-        {
-            string value_deletion_result = "Value deletion failed";
-
-
-            return value_deletion_result;
-        }
     }
 }

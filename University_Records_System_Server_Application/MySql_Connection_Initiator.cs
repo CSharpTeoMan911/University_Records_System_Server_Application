@@ -102,18 +102,6 @@ namespace University_Records_System_Server_Application
                         function_result = await grades_functions.Modify_Entity_Data_From_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
-                    case "Insert module":
-                        break;
-
-                    case "Delete module":
-                        break;
-
-                    case "Select modules":
-                        break;
-
-                    case "Update modules data":
-                        break;
-
                 }
             }
             catch (Exception E)

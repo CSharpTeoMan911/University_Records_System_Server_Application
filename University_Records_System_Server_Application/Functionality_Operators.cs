@@ -10,8 +10,6 @@ namespace University_Records_System_Server_Application
     {
         internal Task<string> Insert_Value_In_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
 
-        internal Task<string> Select_Values_By_Criteria_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
-
         internal Task<string> Select_Values_From_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
 
         internal Task<string> Delete_Value_From_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);

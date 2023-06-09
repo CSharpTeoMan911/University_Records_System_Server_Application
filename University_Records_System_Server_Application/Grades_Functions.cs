@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace University_Records_System_Server_Application
 {
-    internal class Grades_Functions : Functionality_Operators
+    internal class Grades_Functions : Server_Cryptographic_Functions, Functionality_Operators
     {
         Authentification_Functions authentification_functions = new Authentification_Functions();
 
@@ -17,18 +17,22 @@ namespace University_Records_System_Server_Application
 
             if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
             {
-                MySqlCommand Command = new MySqlCommand("DELETE FROM courses_grades WHERE grade_id = @grade_id;", connection);
+                Grade grade = Newtonsoft.Json.JsonConvert.DeserializeObject<Grade>(value);
+
+
+                MySqlCommand Command = new MySqlCommand("DELETE FROM courses_grades WHERE grade_id = @grade_id AND student_ID = @student_ID;", connection);
 
                 try
                 {
-                    Command.Parameters.AddWithValue("grade_id", value);
+                    Command.Parameters.AddWithValue("grade_id", grade.grade_id);
+                    Command.Parameters.AddWithValue("student_ID", grade.student_ID);
                     await Command.ExecuteNonQueryAsync();
 
                     value_deletion_result = "Value deletion successful";
                 }
-                catch
+                catch (Exception E)
                 {
-
+                    await Server_Error_Logs(E, "Delete_Value_From_MySql_Database");
                 }
                 finally
                 {
@@ -53,32 +57,40 @@ namespace University_Records_System_Server_Application
 
                 if (grade != null)
                 {
-                    MySqlCommand Command = new MySqlCommand("INSERT INTO courses_grades VALUES(@grade_id, @student_ID, @course_ID, @subject_module, @student_grade);", connection);
-                    try
+                    if(grade.student_grade <= 100)
                     {
-                        Command.Parameters.AddWithValue("grade_id", grade.grade_id);
-                        Command.Parameters.AddWithValue("student_ID", grade.student_ID);
-                        Command.Parameters.AddWithValue("course_ID", grade.course_ID);
-                        Command.Parameters.AddWithValue("subject_module", grade.subject_module);
-                        Command.Parameters.AddWithValue("student_grade", grade.student_grade);
-
-                        await Command.ExecuteNonQueryAsync();
-
-                        value_insertion_result = "Value inserted";
-                    }
-                    catch (Exception E)
-                    {
-                        if (E.Message.Contains("Duplicate entry") == true)
+                        MySqlCommand Command = new MySqlCommand("INSERT INTO courses_grades VALUES(@grade_id, @student_ID, @course_ID, @subject_module, @student_grade);", connection);
+                        try
                         {
-                            value_insertion_result = "Course already exists";
+                            Command.Parameters.AddWithValue("grade_id", grade.grade_id);
+                            Command.Parameters.AddWithValue("student_ID", grade.student_ID);
+                            Command.Parameters.AddWithValue("course_ID", grade.course_ID);
+                            Command.Parameters.AddWithValue("subject_module", grade.subject_module);
+                            Command.Parameters.AddWithValue("student_grade", grade.student_grade);
+
+                            await Command.ExecuteNonQueryAsync();
+
+                            value_insertion_result = "Value inserted";
+                        }
+                        catch (Exception E)
+                        {
+                            await Server_Error_Logs(E, "Log_In_Session_Key_Validation");
+                            if (E.Message.Contains("Duplicate entry") == true)
+                            {
+                                value_insertion_result = "Course already exists";
+                            }
+                        }
+                        finally
+                        {
+                            if (Command != null)
+                            {
+                                await Command.DisposeAsync();
+                            }
                         }
                     }
-                    finally
+                    else
                     {
-                        if (Command != null)
-                        {
-                            await Command.DisposeAsync();
-                        }
+                        value_insertion_result = "Grade exceeded maximum value";
                     }
                 }
             }
@@ -92,11 +104,13 @@ namespace University_Records_System_Server_Application
 
             if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
             {
+                System.Diagnostics.Debug.WriteLine("ID: " + value);
 
-                MySqlCommand Command = new MySqlCommand("SELECT * FROM courses_grades;", connection);
+                MySqlCommand Command = new MySqlCommand("SELECT * FROM courses_grades WHERE student_ID = @student_ID;", connection);
 
                 try
                 {
+                    Command.Parameters.AddWithValue("student_ID", value);
 
                     MySqlDataReader Reader = await Command.ExecuteReaderAsync();
 
@@ -124,9 +138,9 @@ namespace University_Records_System_Server_Application
 
                         values_selection_result = Newtonsoft.Json.JsonConvert.SerializeObject(grades);
                     }
-                    catch(Exception E)
+                    catch (Exception E)
                     {
-                        System.Diagnostics.Debug.WriteLine(E.Message);
+                        await Server_Error_Logs(E, "Select_Values_From_MySql_Database");
                     }
                     finally
                     {
@@ -136,9 +150,9 @@ namespace University_Records_System_Server_Application
                         }
                     }
                 }
-                catch
+                catch (Exception E)
                 {
-
+                    await Server_Error_Logs(E, "Select_Values_From_MySql_Database");
                 }
                 finally
                 {
@@ -163,48 +177,48 @@ namespace University_Records_System_Server_Application
 
                 if (grade != null)
                 {
-
-                    MySqlCommand Command = new MySqlCommand("UPDATE courses_grades SET student_grade = @student_grade, student_ID = @student_ID, course_ID = @course_ID, subject_module = @subject_module WHERE grade_id = @grade_id;", connection);
-
-                    try
+                    if (grade.student_grade <= 100)
                     {
-                        Command.Parameters.AddWithValue("grade_id", grade.grade_id);
-                        Command.Parameters.AddWithValue("student_ID", grade.student_ID);
-                        Command.Parameters.AddWithValue("course_ID", grade.course_ID);
-                        Command.Parameters.AddWithValue("subject_module", grade.student_grade);
-                        Command.Parameters.AddWithValue("student_grade", grade.student_grade);
+                        MySqlCommand Command = new MySqlCommand("UPDATE courses_grades SET student_grade = @student_grade, course_ID = @course_ID, subject_module = @subject_module WHERE grade_id = @grade_id AND  student_ID = @student_ID;", connection);
 
-                        await Command.ExecuteNonQueryAsync();
-
-                        value_modification_result = "Value modification successful";
-                    }
-                    catch (Exception E)
-                    {
-
-                        if (E.Message.Contains("Cannot add or update a child row: a foreign key constraint fails") == true)
+                        try
                         {
-                            value_modification_result = "Course does not exist";
+                            Command.Parameters.AddWithValue("grade_id", grade.grade_id);
+                            Command.Parameters.AddWithValue("student_ID", grade.student_ID);
+                            Command.Parameters.AddWithValue("course_ID", grade.course_ID);
+                            Command.Parameters.AddWithValue("subject_module", grade.subject_module);
+                            Command.Parameters.AddWithValue("student_grade", grade.student_grade);
+
+                            await Command.ExecuteNonQueryAsync();
+
+                            value_modification_result = "Value modification successful";
+                        }
+                        catch (Exception E)
+                        {
+                            await Server_Error_Logs(E, "Modify_Entity_Data");
+                            if (E.Message.Contains("Cannot add or update a child row: a foreign key constraint fails") == true)
+                            {
+                                value_modification_result = "Course does not exist";
+                            }
+                        }
+                        finally
+                        {
+                            if (Command != null)
+                            {
+                                await Command.DisposeAsync();
+                            }
                         }
                     }
-                    finally
+                    else 
                     {
-                        if (Command != null)
-                        {
-                            await Command.DisposeAsync();
-                        }
+                        value_modification_result = "Grade exceeded maximum value";
                     }
+
                 }
             }
 
             return value_modification_result;
         }
 
-        public async Task<string> Select_Values_By_Criteria_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
-        {
-            string value_deletion_result = "Value deletion failed";
-
-
-            return value_deletion_result;
-        }
     }
 }
