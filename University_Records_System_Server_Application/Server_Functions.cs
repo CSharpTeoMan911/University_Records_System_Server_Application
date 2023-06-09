@@ -8,6 +8,9 @@ namespace University_Records_System_Server_Application
 {
     class Server_Functions:Client_Connections
     {
+
+        // THIS METHOD REGULATES THE NUMBER OF I/O AND WORKER THREADS WITHIN THE APPLICATION'S RUNTIME DEFAULT THREAD POOL.
+        // THE NUMBER OF AVAILABLE FREE THREAD POOLS IS SET TO BE 1000 FOR BOTH THE I/O AND WORKER THREADS
         protected static Task<bool> Thread_Pool_Regulator()
         {
             int Worker_Threads = 0;
@@ -40,6 +43,8 @@ namespace University_Records_System_Server_Application
         }
 
 
+
+        // THIS METHOD VERIFIES IF THE SERVER'S SMTP CREDENTIALS ARE CORRECT
         protected static Task<bool> Verify_SMTPS_Credentials(string SMTPS_Email_Address, string SMTPS_Email_Password)
         {
             bool Are_SMTPS_Credentials_Valid = false;
@@ -86,6 +91,9 @@ namespace University_Records_System_Server_Application
             return Task.FromResult(Are_SMTPS_Credentials_Valid);
         }
 
+
+
+        // THIS IS THE SERVER'S SMTPS SERVICE. THIS METHOD ENABLES INFORMATION TRANSMISSION OVER SMTPS
         protected static async Task<string> SMTPS_Service(string random_key, string receipient_email_address, string function)
         {
             string SMTPS_Session_Result = String.Empty;
@@ -170,6 +178,8 @@ namespace University_Records_System_Server_Application
         }
 
 
+
+        // THIS METHOD VERIFIES IF THE SET MYSQL CREDENTIALS ARE VALID
         protected static async Task<bool> MySql_Connection_Validation()
         {
             bool Is_MySql_Connection_Successful = false;
@@ -197,6 +207,10 @@ namespace University_Records_System_Server_Application
         }
 
 
+
+
+        // THIS METHOD DELETES EXPIRED ITEMS IN THE DATABASE TABLES WHERE THE ITEMS HAVE A SET EXPIRATION DATE
+        // THESE ITEMS INCLUDE LOG IN SESSION KEYS AND RANDOMLY GENERATED CODES.
         protected static async Task<bool> Delete_Expired_Database_Items()
         {
 
@@ -346,22 +360,6 @@ namespace University_Records_System_Server_Application
             return true;
         }
 
-        
-        protected static async Task<bool> Delete_Expired_Log_In_Session_Keys_Accounts()
-        {
-            return true;
-        }
-
-        protected static async Task<bool> Delete_Expired_Pending_Log_In_Sessions_Accounts()
-        {
-            return true;
-        }
-
-
-        protected static async Task<bool> Delete_Expired_Accounts_Pending_For_Validation_Accounts()
-        {
-            return true;
-        }
 
     }
 }

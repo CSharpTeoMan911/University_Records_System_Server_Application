@@ -12,10 +12,13 @@ namespace University_Records_System_Server_Application
         Authentification_Functions authentification_functions = new Authentification_Functions();
 
 
+
+        // DELETE COURSE FROM THE DATABASE
         public async Task<string> Delete_Value_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
             string value_deletion_result = "Value deletion failed";
 
+            // VERIFY IF CLIENT LOG IN SESSION KEY IS VALID
             if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
             {
                 MySqlCommand Command = new MySqlCommand("DELETE FROM departments_courses WHERE course_ID = @course_ID;", connection);
@@ -43,11 +46,15 @@ namespace University_Records_System_Server_Application
             return value_deletion_result;
         }
 
+
+        // INSERT COURSE FROM THE DATABASE
         public async Task<string> Insert_Value_In_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
             string value_insertion_result = "Value insertion failed";
 
 
+
+            // VERIFY IF CLIENT LOG IN SESSION KEY IS VALID
             if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
             {
                 Course course = Newtonsoft.Json.JsonConvert.DeserializeObject<Course>(value);
@@ -96,10 +103,15 @@ namespace University_Records_System_Server_Application
             return value_insertion_result;
         }
 
+
+
+        // SELECT ALL COURSES FROM THE DATABASE
         public async Task<string> Select_Values_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
             string values_selection_result = "Value selection failed";
 
+
+            // VERIFY IF CLIENT LOG IN SESSION KEY IS VALID
             if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
             {
 
@@ -162,10 +174,13 @@ namespace University_Records_System_Server_Application
         }
 
 
+        // MODIFY COURSE FROM THE DATABASE
         public async Task<string> Modify_Entity_Data(string log_in_session_key, string value, MySqlConnection connection)
         {
             string value_modification_result = "Value modification failed";
 
+
+            // VERIFY IF CLIENT LOG IN SESSION KEY IS VALID
             if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
             {
                 Course course = Newtonsoft.Json.JsonConvert.DeserializeObject<Course>(value);

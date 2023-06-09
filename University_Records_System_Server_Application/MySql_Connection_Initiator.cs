@@ -17,6 +17,7 @@ namespace University_Records_System_Server_Application
 
 
 
+        // INTIATE A MYSQL CONNECTION IN ORDER TO EXECUTE THE CLIENT REQUEST
         public async Task<string> Initiate_MySql_Connection<Password__Or__Binary_Content>(string email__or__log_in_session_key, Password__Or__Binary_Content password__or__binary_content, string function)
         {
             string function_result = String.Empty;

@@ -11,10 +11,14 @@ namespace University_Records_System_Server_Application
     {
         Authentification_Functions authentification_functions = new Authentification_Functions();
 
+
+        // DELETE GRADE FROM DATABASE
         public async Task<string> Delete_Value_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
             string value_deletion_result = "Value deletion failed";
 
+
+            // VERIFY IF LOG IN SESSION KEY IS VALID
             if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
             {
                 Grade grade = Newtonsoft.Json.JsonConvert.DeserializeObject<Grade>(value);
@@ -46,11 +50,14 @@ namespace University_Records_System_Server_Application
             return value_deletion_result;
         }
 
+
+        // INSERT GRADE INTO THE DATABASE
         public async Task<string> Insert_Value_In_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
             string value_insertion_result = "Value insertion failed";
 
 
+            // VERIFY IF LOG IN SESSION KEY IS VALID
             if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
             {
                 Grade grade = Newtonsoft.Json.JsonConvert.DeserializeObject<Grade>(value);
@@ -102,13 +109,17 @@ namespace University_Records_System_Server_Application
             return value_insertion_result;
         }
 
+
+
+        // SELECT ALL GRADES FROM THE DATABASE
         public async Task<string> Select_Values_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
             string values_selection_result = "Value selection failed";
 
+
+            // VERIFY IF LOG IN SESSION KEY IS VALID
             if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
             {
-                System.Diagnostics.Debug.WriteLine("ID: " + value);
 
                 MySqlCommand Command = new MySqlCommand("SELECT * FROM courses_grades WHERE student_ID = @student_ID;", connection);
 
@@ -170,10 +181,14 @@ namespace University_Records_System_Server_Application
             return values_selection_result;
         }
 
+
+        // MODIFY GRADE FROM THE DATABASE
         public async Task<string> Modify_Entity_Data(string log_in_session_key, string value, MySqlConnection connection)
         {
             string value_modification_result = "Value modification failed";
 
+
+            // VERIFY IF LOG IN SESSION KEY IS VALID
             if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
             {
                 Grade grade = Newtonsoft.Json.JsonConvert.DeserializeObject<Grade>(value);

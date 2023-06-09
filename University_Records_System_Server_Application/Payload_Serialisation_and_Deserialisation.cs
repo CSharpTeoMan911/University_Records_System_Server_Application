@@ -10,7 +10,7 @@ namespace University_Records_System_Server_Application
     {
 
 
-
+        // DESERIALIZE THE CLIENT PAYLOAD
         public async Task<Client_WSDL_Payload> Deserialise_Client_Payload(byte[] payload)
         {
             Client_WSDL_Payload client_payload = new Client_WSDL_Payload();
@@ -50,7 +50,7 @@ namespace University_Records_System_Server_Application
         }
 
 
-
+        // SERIALISE THE CLIENT PAYLOAD
         public async Task<byte[]> Serialise_Server_Payload(string content)
         {
 

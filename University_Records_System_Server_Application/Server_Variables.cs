@@ -77,7 +77,9 @@ namespace University_Records_System_Server_Application
 
 
 
-
+        // CONTROLLER METHODS THAT ARE USED TO PERFORM OPERTIONS WITH THE SERVER'S X509 CERTIFICATE
+        //
+        // [ BEGIN ]
         internal static async Task<bool> X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations operation)
         {
             bool Operation_Result = false;
@@ -96,7 +98,6 @@ namespace University_Records_System_Server_Application
             return Operation_Result;
         }
 
-
         internal static async Task<bool> X509_Server_Certificate_Operational_Controller(X509_Server_Certificate_Operations operation, int expiry_date_period)
         {
             bool Operation_Result = false;
@@ -108,6 +109,8 @@ namespace University_Records_System_Server_Application
 
             return Operation_Result;
         }
+        // [ END ]
+
 
 
 
@@ -307,6 +310,8 @@ namespace University_Records_System_Server_Application
 
 
 
+        // METHOD THAT LOADS THE SERVER CERTIFICATE FROM THE STATIC MEMORY (HDD/SSD) TO THE DYNAMIC MEMORY (RAM)
+        // INSIDE THE VARIABLE "server_certificate".
         private static async Task<bool> Load_Certificate()
         {
             bool Certificate_Loadup_Is_Successful = false;
@@ -343,6 +348,9 @@ namespace University_Records_System_Server_Application
         }
 
 
+
+        // METHOD THAT UNLOADS THE SERVER CERTIFICATE FROM THE DYNAMIC MEMORY (RAM)
+        // THAT IS STORED IN THE VARIABLE "server_certificate".
         private static async Task<bool> Unload_Certificate()
         {
             bool Certificate_Unload_Is_Successful = false;
@@ -363,7 +371,7 @@ namespace University_Records_System_Server_Application
 
 
 
-
+        // CONTROLLER USED TO PERFORM VARIOUS OPERATIONS WITH THE SERVER APPLICATION SETTINGS FILE
         internal static async Task<bool> Settings_File_Controller(Settings_File_Options option)
         {
             bool Settings_File_Controller_Operation_Is_Successful = false;
@@ -384,7 +392,9 @@ namespace University_Records_System_Server_Application
 
 
 
-
+        // METHOD THAT GRANTS THE SERVER APPLICATION'S SETTINGS FILE THE NECESSARY PERMISSIONS
+        // IN ORDER TO PERFORM THE SPECIFIED OPERATIONS IN RELATION WITH THE OPERATING SYSTEM
+        // ON WHICH THE SERVER APPLICATION IS RUNNING
         private static Task<bool> Grant_Settings_File_Permissions()
         {
             if (File.Exists(settings_file_name) == true)
@@ -410,7 +420,7 @@ namespace University_Records_System_Server_Application
 
 
 
-
+        // METHOD THAT CREATES A SETTINGS FILE FOR THE SERVER APPLICATION 
         private async static Task<bool> Create_Settings_File()
         {
             bool Create_Settings_File_Is_Successful = false;
@@ -460,7 +470,7 @@ namespace University_Records_System_Server_Application
 
 
 
-
+        // METHOD THAT UPDATES THE SERVER APPLICATION'S SETTINGS FILE WITH THE UPDATED FIELDS
         private async static Task<bool> Update_Settings_File()
         {
             bool Update_Settings_File_Is_Successful = false;
@@ -488,6 +498,11 @@ namespace University_Records_System_Server_Application
         }
 
 
+
+
+        // METHOD THAT LOADS THE SERVER APPLICATION'S SETTINGS FILE VALUES FROM THE
+        // STATIC MEMORY (HDD/SSD) IN THE DYNAMIC MEMORY (RAM) USING A SET OF 
+        // VARIABLES TO STORE THE VALUES WITHIN THE SETTINGS FILE
         private async static Task<bool> Load_Settings_From_File()
         {
             bool Load_Settings_File_Is_Successful = false;

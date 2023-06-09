@@ -9,6 +9,11 @@ namespace University_Records_System_Server_Application
 {
     internal class Student_Records_System_Functions
     {
+        // CLASS THAT IS THE IMPLEMENTOR CLASS OF THE STARTEGY DESIGN PATTERN IMPLEMENTATION
+        // THAT IS RESPONSIBLE FOR GRADE, COURSES, AND STUDENT RELATED OPERATIONS WITHIN
+        // THE STUDENT RECORDS SYSTEM
+
+
         private Functionality_Operators functions;
 
         public Student_Records_System_Functions(Functionality_Operators functionality)

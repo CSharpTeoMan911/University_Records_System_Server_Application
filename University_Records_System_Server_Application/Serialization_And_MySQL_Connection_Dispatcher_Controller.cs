@@ -10,6 +10,12 @@ namespace University_Records_System_Server_Application
     {
         private static Serialization_And_MySQL_Connection_Dispatcher Serialization_And_MySQL_Connection_Dispatcher = new Serialization_And_MySQL_Connection_Dispatcher();
 
+
+        // A SERIES OF METHODS THAT CALL THE DISPATCHER METHODS IN "Serialization_And_MySQL_Connection_Dispatcher" CLASS
+        //
+        // THESE METHODS REPRESENT FUNCTIONALITY CONTROLLERS RELATED TO DATA SERIALIZARION AND MYSQL OPERATIONS
+
+
         public static async Task<byte[]> Serialise_Server_Payload_Dispatcher(string content)
         {
             return await Serialization_And_MySQL_Connection_Dispatcher.Dispatcher(content);

@@ -8,6 +8,7 @@ namespace University_Records_System_Server_Application
 {
     internal interface Functionality_Operators
     {
+        // INTERFACE METHODS USED BY THE GRADES, COURSES, AND STUDENT FUNCTIONS 
         internal Task<string> Insert_Value_In_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
 
         internal Task<string> Select_Values_From_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);

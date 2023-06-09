@@ -15,7 +15,7 @@ namespace University_Records_System_Server_Application
 
 
 
-
+        // METHOD THAT CREATES A 30 CHARACTERS RANDOM KEY 
         protected static Task<string> Create_Random_Key()
         {
             string random_key = String.Empty;
@@ -42,6 +42,8 @@ namespace University_Records_System_Server_Application
             return Task.FromResult(random_key);
         }
 
+
+        // METHOD THAT HASHES CONTENT USING THE SHA256 HASHING ALGORITHM
         protected static async Task<byte[]> Content_Hasher(string content)
         {
             byte[] Content_Hashing_Result = new byte[] { };

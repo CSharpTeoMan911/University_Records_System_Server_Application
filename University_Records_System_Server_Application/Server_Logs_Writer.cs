@@ -13,6 +13,10 @@ namespace University_Records_System_Server_Application
         //////////////////////////////////
 
 
+
+        // THIS METHOD IS WRITING LOGS IN A TEXT FILE EXERYTIME THIS METHOD IS CALLED.
+        // THIS METHOD IS CALLED BY THE SERVER APPLICATION'S CORE FUNCTIONALITIES
+        // WHEN AN ERROR OCCURS.
         protected static async Task<bool> Server_Error_Logs(Exception E, string funtion)
         {
             bool successful = false;
