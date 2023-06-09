@@ -6,7 +6,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  </PropertyGroup> 
 
   <ItemGroup>
     <PackageReference Include="MailKit" Version="3.5.0" />
