@@ -13,12 +13,77 @@ namespace University_Records_System_Server_Application
 
         public async Task<string> Delete_Value_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
-            return "";
+            string value_deletion_result = "Value deletion failed";
+
+            if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
+            {
+                MySqlCommand Command = new MySqlCommand("DELETE FROM courses_grades WHERE grade_id = @grade_id;", connection);
+
+                try
+                {
+                    Command.Parameters.AddWithValue("grade_id", value);
+                    await Command.ExecuteNonQueryAsync();
+
+                    value_deletion_result = "Value deletion successful";
+                }
+                catch
+                {
+
+                }
+                finally
+                {
+                    if (Command != null)
+                    {
+                        await Command.DisposeAsync();
+                    }
+                }
+            }
+
+            return value_deletion_result;
         }
 
         public async Task<string> Insert_Value_In_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
-            return "";
+            string value_insertion_result = "Value insertion failed";
+
+
+            if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
+            {
+                Grade grade = Newtonsoft.Json.JsonConvert.DeserializeObject<Grade>(value);
+
+                if (grade != null)
+                {
+                    MySqlCommand Command = new MySqlCommand("INSERT INTO courses_grades VALUES(@grade_id, @student_ID, @course_ID, @subject_module, @student_grade);", connection);
+                    try
+                    {
+                        Command.Parameters.AddWithValue("grade_id", grade.grade_id);
+                        Command.Parameters.AddWithValue("student_ID", grade.student_ID);
+                        Command.Parameters.AddWithValue("course_ID", grade.course_ID);
+                        Command.Parameters.AddWithValue("subject_module", grade.subject_module);
+                        Command.Parameters.AddWithValue("student_grade", grade.student_grade);
+
+                        await Command.ExecuteNonQueryAsync();
+
+                        value_insertion_result = "Value inserted";
+                    }
+                    catch (Exception E)
+                    {
+                        if (E.Message.Contains("Duplicate entry") == true)
+                        {
+                            value_insertion_result = "Course already exists";
+                        }
+                    }
+                    finally
+                    {
+                        if (Command != null)
+                        {
+                            await Command.DisposeAsync();
+                        }
+                    }
+                }
+            }
+
+            return value_insertion_result;
         }
 
         public async Task<string> Select_Values_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
@@ -89,7 +154,49 @@ namespace University_Records_System_Server_Application
 
         public async Task<string> Modify_Entity_Data(string log_in_session_key, string value, MySqlConnection connection)
         {
-            return "";
+            string value_modification_result = "Value modification failed";
+
+            if (await authentification_functions.Log_In_Session_Key_Validation(log_in_session_key, connection) == "Log in session key validated")
+            {
+                Grade grade = Newtonsoft.Json.JsonConvert.DeserializeObject<Grade>(value);
+
+
+                if (grade != null)
+                {
+
+                    MySqlCommand Command = new MySqlCommand("UPDATE courses_grades SET student_grade = @student_grade, student_ID = @student_ID, course_ID = @course_ID, subject_module = @subject_module WHERE grade_id = @grade_id;", connection);
+
+                    try
+                    {
+                        Command.Parameters.AddWithValue("grade_id", grade.grade_id);
+                        Command.Parameters.AddWithValue("student_ID", grade.student_ID);
+                        Command.Parameters.AddWithValue("course_ID", grade.course_ID);
+                        Command.Parameters.AddWithValue("subject_module", grade.student_grade);
+                        Command.Parameters.AddWithValue("student_grade", grade.student_grade);
+
+                        await Command.ExecuteNonQueryAsync();
+
+                        value_modification_result = "Value modification successful";
+                    }
+                    catch (Exception E)
+                    {
+
+                        if (E.Message.Contains("Cannot add or update a child row: a foreign key constraint fails") == true)
+                        {
+                            value_modification_result = "Course does not exist";
+                        }
+                    }
+                    finally
+                    {
+                        if (Command != null)
+                        {
+                            await Command.DisposeAsync();
+                        }
+                    }
+                }
+            }
+
+            return value_modification_result;
         }
 
         public async Task<string> Select_Values_By_Criteria_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)

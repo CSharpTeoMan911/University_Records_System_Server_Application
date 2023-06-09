@@ -87,9 +87,11 @@ namespace University_Records_System_Server_Application
                         break;
 
                     case "Insert grade":
+                        function_result = await grades_functions.Insert_Value_In_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Delete grade":
+                        function_result = await grades_functions.Delete_Value_From_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Select grades":
@@ -97,6 +99,7 @@ namespace University_Records_System_Server_Application
                         break;
 
                     case "Update grade data":
+                        function_result = await grades_functions.Modify_Entity_Data_From_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Insert module":
