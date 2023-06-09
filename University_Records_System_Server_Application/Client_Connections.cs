@@ -118,7 +118,9 @@ namespace University_Records_System_Server_Application
 
 
                     // "serialised_payload_content" OBJECT WHICH HOLDS THE RESULT OF THE OPERTION REQUESTED TO BE PERFORMED BY THE CLIENT
-                    string serialised_payload_content = await Serialization_And_MySQL_Connection_Dispatcher_Controller.Initiate_MySql_Connection_Dispatcher<string>(deserialised_client_payload.email__or__log_in_session_key, deserialised_client_payload.password__or__binary_content, deserialised_client_payload.function);
+                    string serialised_payload_content = await Serialization_And_MySQL_Connection_Dispatcher_Controller.Initiate_MySql_Connection_Dispatcher<string>(deserialised_client_payload.email__or__log_in_session_key, 
+                                                                                                                                                                    deserialised_client_payload.password__or__binary_content, 
+                                                                                                                                                                    deserialised_client_payload.function);
 
 
                     // "serialised_payload" OBJECT THAT HOLDS THE SERIALISED PAYLOAD TO BE SENT TO THE CLIENT
@@ -290,12 +292,12 @@ namespace University_Records_System_Server_Application
         // IN ACCORDANCE WITH THE PACKET SIZE TO BE SENT OR RECEIVED.
         private static Task<int> Calculate_Connection_Timeout(System.Net.Sockets.Socket client, int payload_size, int bytes_per_second)
         {
-            int seconds = 1000 * (payload_size / bytes_per_second) + 1000;
+            int milliseconds = 1000 * (payload_size / bytes_per_second) + 1000;
 
-            if (seconds > 1000)
+            if (milliseconds > 1000)
             {
-                client.SendTimeout = seconds;
-                client.ReceiveTimeout = seconds;
+                client.SendTimeout = milliseconds;
+                client.ReceiveTimeout = milliseconds;
             }
             else
             {

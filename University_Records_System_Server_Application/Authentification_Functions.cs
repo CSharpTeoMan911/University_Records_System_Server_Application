@@ -450,7 +450,8 @@ namespace University_Records_System_Server_Application
                                         await query_command.ExecuteNonQueryAsync();
 
 
-                                        MySqlConnector.MySqlCommand move_account_to_validation_queue = new MySqlConnector.MySqlCommand("INSERT INTO pending_account_validation VALUES(@email, @one_time_account_validation_code, NOW() + INTERVAL 2 HOUR);", connection);
+                                        MySqlConnector.MySqlCommand move_account_to_validation_queue = new MySqlConnector.MySqlCommand("INSERT INTO pending_account_validation VALUES(@email, " +
+                                            "                                                                                           @one_time_account_validation_code, NOW() + INTERVAL 2 HOUR);", connection);
 
                                         try
                                         {
