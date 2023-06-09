@@ -9,28 +9,31 @@ namespace University_Records_System_Server_Application
 {
     internal class Modules_Functions:Functionality_Operators
     {
-        public async Task<bool> Delete_Value_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
+        public async Task<string> Delete_Value_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
-            return true;
+            return "";
         }
 
-        public async Task<bool> Insert_Value_In_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
+        public async Task<string> Insert_Value_In_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
-            return true;
+            return "";
         }
 
-        public async Task<bool> Select_Values_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
+        public async Task<string> Select_Values_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
-            return true;
+            return "";
         }
 
-        public async Task<bool> Select_Value_From_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
+        public async Task<string> Modify_Entity_Data(string log_in_session_key, string value, MySqlConnection connection)
         {
-            return true;
+            return "";
         }
-        public async Task<bool> Modify_Entity_Data(string log_in_session_key, string value, MySqlConnection connection)
+        public async Task<string> Select_Values_By_Criteria_MySql_Database(string log_in_session_key, string value, MySqlConnection connection)
         {
-            return true;
+            string value_deletion_result = "Value deletion failed";
+
+
+            return value_deletion_result;
         }
     }
 }

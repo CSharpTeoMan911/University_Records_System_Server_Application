@@ -8,14 +8,14 @@ namespace University_Records_System_Server_Application
 {
     internal interface Functionality_Operators
     {
-        internal Task<bool> Insert_Value_In_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
+        internal Task<string> Insert_Value_In_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
 
-        internal Task<bool> Select_Value_From_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
+        internal Task<string> Select_Values_By_Criteria_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
 
-        internal Task<bool> Select_Values_From_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
+        internal Task<string> Select_Values_From_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
 
-        internal Task<bool> Delete_Value_From_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
+        internal Task<string> Delete_Value_From_MySql_Database(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
 
-        internal Task<bool> Modify_Entity_Data(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
+        internal Task<string> Modify_Entity_Data(string log_in_session_key, string value, MySqlConnector.MySqlConnection connection);
     }
 }

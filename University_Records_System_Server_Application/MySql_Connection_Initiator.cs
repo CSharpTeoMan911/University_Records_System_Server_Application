@@ -10,7 +10,9 @@ namespace University_Records_System_Server_Application
     class MySql_Connection_Initiator:Server_Variables
     {
         private static Student_Records_System_Functions student_functions = new Student_Records_System_Functions(new Student_Functions());
-        private static Student_Records_System_Functions courses_functions = new Student_Records_System_Functions(new Student_Functions());
+        private static Student_Records_System_Functions courses_functions = new Student_Records_System_Functions(new Courses_Functions());
+        private static Student_Records_System_Functions grades_functions = new Student_Records_System_Functions(new Grades_Functions());
+
         private static Authentification_Functions authentification_functions = new Authentification_Functions();
 
 
@@ -53,33 +55,35 @@ namespace University_Records_System_Server_Application
                         break;
 
                     case "Insert student":
+                        function_result = await student_functions.Insert_Value_In_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Delete student":
-                        break;
-
-                    case "Select student":
+                        function_result = await student_functions.Delete_Value_From_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Select students":
+                        function_result = await student_functions.Select_Values_From_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Update student data":
+                        function_result = await student_functions.Modify_Entity_Data_From_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Insert course":
+                        function_result = await courses_functions.Insert_Value_In_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Delete course":
-                        break;
-
-                    case "Select course":
+                        function_result = await courses_functions.Delete_Value_From_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Select courses":
+                        function_result = await courses_functions.Select_Values_From_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Update course data":
+                        function_result = await courses_functions.Modify_Entity_Data_From_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Insert grade":
@@ -88,10 +92,8 @@ namespace University_Records_System_Server_Application
                     case "Delete grade":
                         break;
 
-                    case "Select grade":
-                        break;
-
                     case "Select grades":
+                        function_result = await grades_functions.Select_Values_From_MySql_Database(email__or__log_in_session_key, password__or__binary_content as string, connection);
                         break;
 
                     case "Update grade data":
@@ -101,9 +103,6 @@ namespace University_Records_System_Server_Application
                         break;
 
                     case "Delete module":
-                        break;
-
-                    case "Select module":
                         break;
 
                     case "Select modules":
